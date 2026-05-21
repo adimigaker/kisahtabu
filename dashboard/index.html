@@ -1,1 +1,107 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dashboard - Kisah Tabu</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header class="dash-header">
+        <div class="dash-header-inner">
+            <h1>Dashboard</h1>
+            <div class="header-actions">
+                <button id="newStoryBtn" class="btn-new-story">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Cerita Baru
+                </button>
+                <button id="exportBtn" class="btn-secondary" title="Export JSON">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export
+                </button>
+                <button id="syncBtn" class="btn-secondary" title="Sinkronisasi">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    Sync
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="seriesContainer" class="list-view">
+        <!-- Render JS -->
+    </main>
+
+    <!-- Popup Cerita Baru -->
+    <div id="newStoryModal" class="modal-overlay" style="display:none;">
+        <div class="modal-popup modal-sm">
+            <button class="modal-close" id="closeModalBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <h2>Cerita Baru</h2>
+            <form id="newStoryForm">
+                <div class="id-chapter-row">
+                    <div class="input-group" style="flex:7;">
+                        <label>ID Series</label>
+                        <input type="text" id="popupId" required placeholder="ELIZA" style="text-transform:uppercase;">
+                    </div>
+                    <div class="input-group" style="flex:3;">
+                        <label>Chapter</label>
+                        <input type="text" id="popupChapter" required placeholder="01" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Judul Cerita</label>
+                    <input type="text" id="popupTitle" required placeholder="Kisah Eliza">
+                </div>
+                <button type="submit" class="btn-start">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Mulai Menulis
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup Konfirmasi Delete -->
+    <div id="confirmDeleteOverlay" class="modal-overlay" style="display:none;">
+        <div class="modal-popup modal-sm confirm-popup">
+            <div class="confirm-icon-wrap">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <h3>Hapus Cerita?</h3>
+            <p>Kamu akan menghapus <strong id="deleteStoryName"></strong>.</p>
+            <p style="font-size:0.8rem;color:#999;">Tindakan ini tidak bisa dibatalkan.</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" id="cancelDeleteBtn">Batal</button>
+                <button class="btn-delete" id="confirmDeleteBtn">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast-notif"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
