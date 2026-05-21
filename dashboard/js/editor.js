@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var charCount = document.getElementById('charCount');
     var toast = document.getElementById('toast');
 
+    // Thumbnail elements
+    var uploadThumbBtn = document.getElementById('uploadThumbBtn');
+    var thumbPreview = document.getElementById('thumbPreview');
+    var thumbPreviewImg = document.getElementById('thumbPreviewImg');
+    var removeThumbBtn = document.getElementById('removeThumbBtn');
+
     // ========== SVG ICONS ==========
     var svg = {
         spinner: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
@@ -45,6 +51,50 @@ document.addEventListener('DOMContentLoaded', function() {
         toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, 2000);
     }
 
+    // ========== THUMBNAIL ==========
+    function updateThumbPreview() {
+        var url = storyThumb.value.trim();
+        if (url) {
+            thumbPreview.style.display = 'inline-block';
+            thumbPreviewImg.src = url;
+        } else {
+            thumbPreview.style.display = 'none';
+            thumbPreviewImg.src = '';
+        }
+    }
+
+    storyThumb.addEventListener('input', updateThumbPreview);
+    updateThumbPreview();
+
+    uploadThumbBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async function() {
+            var file = input.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
+            showToast(svg.upload, 'Upload thumbnail...');
+            var result = await API.uploadImage(file);
+            if (result.success) {
+                storyThumb.value = result.url;
+                updateThumbPreview();
+                showToast(svg.check, 'Thumbnail terupload!');
+                saveDraftAuto();
+            } else {
+                showToast(svg.x, 'Gagal upload thumbnail');
+            }
+        };
+        input.click();
+    });
+
+    removeThumbBtn.addEventListener('click', function() {
+        storyThumb.value = '';
+        updateThumbPreview();
+        saveDraftAuto();
+    });
+
     // ========== LOAD STORY ==========
     async function loadStory() {
         if (isNew) {
@@ -60,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentId = story.id;
                     storyTitle.value = story.title || '';
                     storyThumb.value = story.thumbnail || '';
+                    updateThumbPreview();
                     var chapters = await API.getChapterList(seriesIdParam);
                     if (chapters && chapters.length > 0) {
                         var lastChap = chapters[chapters.length - 1];
@@ -68,15 +119,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (chapData) editorContent.innerHTML = chapData.content || '';
                     }
                 }
-            } catch (err) {
-                console.error('Gagal load:', err);
-            }
+            } catch (err) { console.error('Gagal load:', err); }
         }
         
         var draft = JSON.parse(localStorage.getItem('draft_' + currentId));
         if (draft && draft.content) {
             editorContent.innerHTML = draft.content;
             if (draft.title) storyTitle.value = draft.title;
+            if (draft.thumb) { storyThumb.value = draft.thumb; updateThumbPreview(); }
         }
         
         updateHeaderDisplay();
@@ -109,9 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         saveDraftAuto();
     });
 
-    cancelIdChapterBtn.addEventListener('click', function() {
-        idChapterEdit.style.display = 'none';
-    });
+    cancelIdChapterBtn.addEventListener('click', function() { idChapterEdit.style.display = 'none'; });
 
     // ========== TOOLBAR ==========
     function getCurrentBlockTag() {
