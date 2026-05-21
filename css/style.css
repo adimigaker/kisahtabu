@@ -1,1 +1,370 @@
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --border: #eee;
+    --text: #2c2c2c;
+    --text-light: #888;
+    --red: #c0392b;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ========== HEADER ========== */
+.main-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.2rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 700px;
+    margin: 0 auto;
+    flex-wrap: nowrap;
+}
+
+/* Title */
+.site-title {
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    color: #333;
+    transform: scaleY(1.3);
+    transform-origin: center left;
+    line-height: 1;
+    padding: 0.15rem 0;
+}
+
+.site-title .tabu {
+    color: var(--red);
+    font-weight: 900;
+    margin-left: 0.1rem;
+}
+
+/* Search */
+.search-bar {
+    flex: 1;
+    min-width: 0;
+    max-width: 320px;
+    margin-left: auto;
+    position: relative;
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 0.5rem 0.8rem 0.5rem 2.2rem;
+    border: 1px solid #d5d5d5;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fafafa;
+    color: var(--text);
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #aaa;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
+}
+
+.search-bar input::placeholder {
+    color: #bbb;
+    font-size: 0.82rem;
+}
+
+/* ========== MAIN CONTENT ========== */
+main {
+    flex: 1;
+    padding: 1rem 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+/* Card */
+.story-card {
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    height: 100px;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.story-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.story-card .thumbnail {
+    width: 90px;
+    height: 100%;
+    object-fit: cover;
+    background: #eee;
+    flex-shrink: 0;
+}
+
+.story-card .info {
+    padding: 0.9rem 2.5rem 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.story-card .info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.story-card .info small {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+/* Bookmark button di card */
+.bookmark-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 2;
+    transition: transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bookmark-btn:hover {
+    transform: scale(1.15);
+}
+
+.bookmark-btn:active {
+    transform: scale(0.95);
+}
+
+.bookmark-btn svg {
+    width: 18px;
+    height: 18px;
+    transition: all 0.2s;
+}
+
+/* Default: outline */
+.bookmark-btn .bookmark-outline {
+    stroke: #bbb;
+    fill: none;
+}
+
+.bookmark-btn .bookmark-filled {
+    stroke: #e74c3c;
+    fill: #e74c3c;
+    display: none;
+}
+
+/* Bookmarked state */
+.bookmark-btn.bookmarked .bookmark-outline {
+    display: none;
+}
+
+.bookmark-btn.bookmarked .bookmark-filled {
+    display: block;
+    animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.7); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* ========== FOOTER ========== */
+.main-footer {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 0.6rem 0 0.7rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+}
+
+.footer-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.7rem;
+    color: #aaa;
+    padding: 0.3rem 1rem;
+    transition: all 0.2s;
+}
+
+.footer-btn svg {
+    transition: stroke 0.2s;
+}
+
+.footer-btn.active {
+    color: #333;
+    font-weight: 600;
+}
+
+.footer-btn.active svg {
+    stroke: #333;
+}
+
+.footer-btn.active::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #333;
+    border-radius: 1px;
+    margin-top: 2px;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #aaa;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+    .main-header {
+        padding: 0.55rem 0.7rem;
+    }
+
+    .header-inner {
+        gap: 0.4rem;
+    }
+
+    .site-title {
+        font-size: 1.05rem;
+        letter-spacing: -0.3px;
+        transform: scaleY(1.2);
+    }
+
+    .search-bar {
+        max-width: none;
+    }
+
+    .search-bar input {
+        padding: 0.45rem 0.6rem 0.45rem 2rem;
+        font-size: 0.8rem;
+        border-radius: 5px;
+    }
+
+    main {
+        padding: 0.7rem;
+    }
+
+    .story-card {
+        height: 85px;
+    }
+
+    .story-card .thumbnail {
+        width: 70px;
+    }
+
+    .story-card .info {
+        padding: 0.6rem 2.2rem 0.6rem 0.8rem;
+    }
+
+    .story-card .info h3 {
+        font-size: 0.9rem;
+    }
+
+    .story-card .info small {
+        font-size: 0.72rem;
+    }
+
+    .bookmark-btn {
+        top: 0.3rem;
+        right: 0.3rem;
+    }
+
+    .bookmark-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .footer-btn {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.65rem;
+    }
+
+    .footer-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 360px) {
+    .site-title {
+        font-size: 0.9rem;
+        transform: scaleY(1.15);
+    }
+
+    .search-bar input {
+        padding: 0.4rem 0.5rem 0.4rem 1.8rem;
+        font-size: 0.75rem;
+    }
+
+    .story-card .thumbnail {
+        width: 60px;
+    }
+}
