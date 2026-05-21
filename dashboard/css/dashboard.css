@@ -1,1 +1,414 @@
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --border: #eee;
+    --text: #2c2c2c;
+    --text-light: #888;
+    --text-muted: #aaa;
+    --danger: #e74c3c;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ========== HEADER ========== */
+.dash-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.2rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.dash-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.dash-header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.btn-new-story {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.84rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: background 0.2s;
+    font-family: inherit;
+}
+
+.btn-new-story:hover { background: #555; }
+
+.btn-secondary {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 0.45rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.btn-secondary:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+    color: #333;
+}
+
+/* ========== MAIN ========== */
+main {
+    padding: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* ========== CARD ========== */
+.series-card-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.series-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+    display: flex;
+    height: 85px;
+    border: 1px solid #f0f0f0;
+    position: relative;
+    z-index: 2;
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.series-card.swiped {
+    transform: translateX(-90px);
+}
+
+.series-card.removing {
+    transform: translateX(-120%);
+    opacity: 0;
+    transition: all 0.3s ease-in;
+}
+
+/* Delete background di belakang card */
+.delete-bg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 90px;
+    height: 100%;
+    background: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    border-radius: 0 8px 8px 0;
+}
+
+.delete-bg span {
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.series-card img {
+    width: 75px;
+    height: 100%;
+    object-fit: cover;
+    background: #eee;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+.series-card .info {
+    padding: 0.7rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    pointer-events: none;
+}
+
+.series-card .info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.series-card .info small {
+    color: var(--text-light);
+    font-size: 0.78rem;
+}
+
+/* ========== MODAL OVERLAY (untuk semua popup) ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-popup {
+    background: white;
+    border-radius: 14px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-sm {
+    max-width: 420px;
+    padding: 1.8rem;
+}
+
+.modal-close {
+    position: absolute;
+    right: 0.8rem;
+    top: 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+    padding: 0.2rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.modal-popup h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+}
+
+/* Form */
+.id-chapter-row {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.input-group {
+    margin-bottom: 0.9rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #999;
+}
+
+.btn-start {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 0.7rem;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: inherit;
+}
+
+.btn-start:hover { background: #555; }
+
+/* ========== CONFIRM POPUP ========== */
+.confirm-popup {
+    text-align: center;
+}
+
+.confirm-icon-wrap {
+    width: 56px;
+    height: 56px;
+    background: #fde8e8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.confirm-popup h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.confirm-popup p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 1.2rem;
+}
+
+.confirm-actions button {
+    padding: 0.55rem 1.8rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.btn-cancel {
+    background: #eee;
+    color: #333;
+}
+
+.btn-cancel:hover { background: #ddd; }
+
+.btn-delete {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-delete:hover { background: #c0392b; }
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #aaa;
+}
+
+.empty-state h3 {
+    margin-bottom: 0.3rem;
+    color: #888;
+}
+
+/* ========== TOAST ========== */
+.toast-notif {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.toast-notif.show {
+    opacity: 1;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+    .dash-header { padding: 0.6rem 0.8rem; }
+    .dash-header-inner { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .dash-header h1 { font-size: 1.1rem; }
+    .btn-new-story, .btn-secondary { padding: 0.4rem 0.65rem; font-size: 0.75rem; }
+    .btn-new-story svg, .btn-secondary svg { width: 14px; height: 14px; }
+    main { padding: 0.8rem; }
+    .series-card { height: 75px; }
+    .series-card img { width: 65px; }
+    .series-card .info h3 { font-size: 0.85rem; }
+    .modal-popup { padding: 1.2rem; }
+}
