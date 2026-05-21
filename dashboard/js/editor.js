@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var currentId = seriesIdParam || '';
     var currentChapter = chapterParam || '01';
 
-    // DOM Elements
+    // DOM
     var headerIdChapter = document.getElementById('headerIdChapter');
     var editIdChapterBtn = document.getElementById('editIdChapterBtn');
     var idChapterEdit = document.getElementById('idChapterEdit');
@@ -25,6 +25,26 @@ document.addEventListener('DOMContentLoaded', function() {
     var charCount = document.getElementById('charCount');
     var toast = document.getElementById('toast');
 
+    // ========== SVG ICONS ==========
+    var svg = {
+        spinner: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+        check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+        alert: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        upload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+        save: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+        send: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+        x: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    };
+
+    // ========== TOAST ==========
+    function showToast(icon, msg) {
+        if (!toast) return;
+        toast.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">' + icon + ' ' + msg + '</span>';
+        toast.classList.add('show');
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+    }
+
     // ========== LOAD STORY ==========
     async function loadStory() {
         if (isNew) {
@@ -40,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentId = story.id;
                     storyTitle.value = story.title || '';
                     storyThumb.value = story.thumbnail || '';
-                    
                     var chapters = await API.getChapterList(seriesIdParam);
                     if (chapters && chapters.length > 0) {
                         var lastChap = chapters[chapters.length - 1];
@@ -50,11 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (err) {
-                console.error('Gagal load story:', err);
+                console.error('Gagal load:', err);
             }
         }
         
-        // Load draft
         var draft = JSON.parse(localStorage.getItem('draft_' + currentId));
         if (draft && draft.content) {
             editorContent.innerHTML = draft.content;
@@ -81,13 +99,13 @@ document.addEventListener('DOMContentLoaded', function() {
     saveIdChapterBtn.addEventListener('click', function() {
         var newId = editSeriesId.value.trim().toUpperCase();
         var newChapter = editChapterNum.value.trim();
-        if (!newId) { showToast('⚠️ ID tidak boleh kosong'); return; }
-        if (!newChapter) { showToast('⚠️ Chapter tidak boleh kosong'); return; }
+        if (!newId) { showToast(svg.alert, 'ID tidak boleh kosong'); return; }
+        if (!newChapter) { showToast(svg.alert, 'Chapter tidak boleh kosong'); return; }
         currentId = newId;
         currentChapter = newChapter;
         updateHeaderDisplay();
         idChapterEdit.style.display = 'none';
-        showToast('✅ Tersimpan');
+        showToast(svg.check, 'Tersimpan');
         saveDraftAuto();
     });
 
@@ -119,9 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    var toolbarButtons = editorToolbar.querySelectorAll('button[data-cmd]');
-    for (var i = 0; i < toolbarButtons.length; i++) {
-        toolbarButtons[i].addEventListener('click', function(e) {
+    var toolbarBtns = editorToolbar.querySelectorAll('button[data-cmd]');
+    for (var j = 0; j < toolbarBtns.length; j++) {
+        toolbarBtns[j].addEventListener('click', function(e) {
             e.preventDefault();
             var cmd = this.dataset.cmd;
             var val = this.dataset.val || null;
@@ -138,12 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    editorContent.addEventListener('keyup', function() {
-        updateToolbarState();
-        updateStats();
-        saveDraftAuto();
-    });
-
+    editorContent.addEventListener('keyup', function() { updateToolbarState(); updateStats(); saveDraftAuto(); });
     editorContent.addEventListener('mouseup', updateToolbarState);
 
     editorContent.addEventListener('paste', function(e) {
@@ -152,9 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!text.trim()) return;
         var paragraphs = text.split('\n').filter(function(p) { return p.trim(); });
         var html = '';
-        for (var i = 0; i < paragraphs.length; i++) {
-            html += '<p>' + paragraphs[i] + '</p>';
-        }
+        for (var k = 0; k < paragraphs.length; k++) { html += '<p>' + paragraphs[k] + '</p>'; }
         document.execCommand('insertHTML', false, html);
         updateStats();
         saveDraftAuto();
@@ -169,20 +180,17 @@ document.addEventListener('DOMContentLoaded', function() {
         input.onchange = async function() {
             var file = input.files[0];
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('⚠️ Maks 5MB');
-                return;
-            }
-            showToast('📤 Upload...');
+            if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
+            showToast(svg.upload, 'Upload...');
             var result = await API.uploadImage(file);
             if (result.success) {
                 editorContent.focus();
                 document.execCommand('insertImage', false, result.url);
-                showToast('✅ Terupload!');
+                showToast(svg.check, 'Terupload!');
                 updateStats();
                 saveDraftAuto();
             } else {
-                showToast('❌ Gagal upload');
+                showToast(svg.x, 'Gagal upload');
             }
         };
         input.click();
@@ -209,116 +217,65 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveDraftAuto() {
         if (!currentId) return;
         localStorage.setItem('draft_' + currentId, JSON.stringify({
-            id: currentId,
-            chapter: currentChapter,
-            title: storyTitle.value,
-            thumb: storyThumb.value,
-            content: editorContent.innerHTML,
-            timestamp: Date.now()
+            id: currentId, chapter: currentChapter,
+            title: storyTitle.value, thumb: storyThumb.value,
+            content: editorContent.innerHTML, timestamp: Date.now()
         }));
     }
 
     saveDraftBtn.addEventListener('click', function() {
         saveDraftAuto();
-        showToast('💾 Draft tersimpan');
+        showToast(svg.save, 'Draft tersimpan');
     });
 
     // ========== PUBLISH ==========
     publishBtn.addEventListener('click', async function() {
-        if (!currentId) {
-            showToast('⚠️ Isi ID dulu!');
-            editIdChapterBtn.click();
-            return;
-        }
-        
+        if (!currentId) { showToast(svg.alert, 'Isi ID dulu!'); editIdChapterBtn.click(); return; }
         var title = storyTitle.value.trim();
         var content = editorContent.innerHTML.trim();
-        
-        if (!title) { showToast('⚠️ Judul wajib diisi!'); return; }
-        if (!content || content === '<br>' || content === '<p><br></p>') {
-            showToast('⚠️ Konten kosong!');
-            return;
-        }
+        if (!title) { showToast(svg.alert, 'Judul wajib diisi!'); return; }
+        if (!content || content === '<br>' || content === '<p><br></p>') { showToast(svg.alert, 'Konten kosong!'); return; }
 
-        publishBtn.textContent = '⏳ Menyimpan...';
+        publishBtn.innerHTML = svg.spinner + ' Menyimpan...';
         publishBtn.disabled = true;
-        showToast('📤 Mengirim ke server...');
+        showToast(svg.send, 'Mengirim ke server...');
 
         try {
             var chapters = await API.getChapterList(currentId);
             var chapterList = [];
-            
             if (chapters && chapters.length > 0) {
                 for (var i = 0; i < chapters.length; i++) {
-                    chapterList.push({
-                        chapter: chapters[i].chapter,
-                        title: chapters[i].title,
-                        content: ''
-                    });
+                    chapterList.push({ chapter: chapters[i].chapter, title: chapters[i].title, content: '' });
                 }
             }
-            
             var newChap = { chapter: currentChapter, title: title, content: content };
             var found = false;
             for (var j = 0; j < chapterList.length; j++) {
-                if (chapterList[j].chapter === currentChapter) {
-                    chapterList[j] = newChap;
-                    found = true;
-                    break;
-                }
+                if (chapterList[j].chapter === currentChapter) { chapterList[j] = newChap; found = true; break; }
             }
             if (!found) chapterList.push(newChap);
 
-            console.log('Sending to API...');
-            var result = await API.saveStory({
-                id: currentId,
-                title: title,
-                thumbnail: storyThumb.value.trim(),
-                chapters: chapterList
-            });
-            console.log('API result:', result);
+            var result = await API.saveStory({ id: currentId, title: title, thumbnail: storyThumb.value.trim(), chapters: chapterList });
 
             if (result.success) {
                 localStorage.removeItem('draft_' + currentId);
-                publishBtn.textContent = '✅ Berhasil!';
-                publishBtn.style.background = '#555';
-                showToast('🎉 Cerita berhasil diterbitkan!');
-                
-                setTimeout(function() {
-                    window.location.href = 'index.html';
-                }, 1500);
+                publishBtn.innerHTML = svg.check + ' Berhasil!';
+                showToast(svg.check, 'Cerita berhasil diterbitkan!');
+                setTimeout(function() { window.location.href = 'index.html'; }, 1500);
             } else {
-                throw new Error(result.error || 'Gagal menyimpan');
+                throw new Error(result.error || 'Gagal');
             }
         } catch (err) {
-            console.error('Publish error:', err);
-            publishBtn.textContent = 'Terbitkan';
+            publishBtn.innerHTML = svg.send + ' Terbitkan';
             publishBtn.disabled = false;
-            showToast('❌ Gagal: ' + (err.message || 'Coba lagi'));
+            showToast(svg.x, 'Gagal: ' + (err.message || 'Coba lagi'));
         }
     });
 
-    // ========== TOAST ==========
-    function showToast(msg) {
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.classList.add('show');
-        clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(function() {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-
     // ========== SHORTCUT ==========
     document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-            e.preventDefault();
-            saveDraftAuto();
-            showToast('💾 Draft tersimpan');
-        }
-        if (e.key === 'Escape' && idChapterEdit.style.display === 'block') {
-            idChapterEdit.style.display = 'none';
-        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); }
+        if (e.key === 'Escape' && idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
     });
 
     // ========== INIT ==========
@@ -326,5 +283,4 @@ document.addEventListener('DOMContentLoaded', function() {
     updateHeaderDisplay();
     updateToolbarState();
     window.addEventListener('beforeunload', function() { saveDraftAuto(); });
-    console.log('✅ Editor siap!');
 });
