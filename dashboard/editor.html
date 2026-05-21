@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="css/editor.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="editor-header" id="editorHeader">
         <a href="index.html" class="nav-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/>
                 <polyline points="12 19 5 12 12 5"/>
             </svg>
@@ -19,20 +18,24 @@
         <div class="header-center">
             <span class="header-id" id="headerIdChapter">ID-01</span>
             <button id="editIdChapterBtn" class="icon-btn" title="Edit ID/Chapter">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
             </button>
         </div>
-        <button id="publishBtn" class="publish-btn">Terbitkan</button>
+        <button id="publishBtn" class="publish-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"/>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+            Terbitkan
+        </button>
     </header>
 
-    <!-- Main Content -->
     <main class="editor-main">
         <div class="editor-container">
             
-            <!-- Edit ID-Chapter inline -->
             <div id="idChapterEdit" class="id-chapter-edit" style="display:none;">
                 <div class="id-chapter-row">
                     <div class="input-group" style="flex:7;">
@@ -46,61 +49,77 @@
                     </div>
                 </div>
                 <div class="edit-actions">
-                    <button id="saveIdChapterBtn" class="action-btn save-btn">✓ Simpan</button>
-                    <button id="cancelIdChapterBtn" class="action-btn cancel-btn">✕ Batal</button>
+                    <button id="saveIdChapterBtn" class="action-btn save-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Simpan
+                    </button>
+                    <button id="cancelIdChapterBtn" class="action-btn cancel-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        Batal
+                    </button>
                 </div>
             </div>
 
-            <!-- Judul -->
             <div class="input-group">
                 <input type="text" id="storyTitle" class="title-input" placeholder="Masukkan judul cerita...">
             </div>
 
-            <!-- Thumbnail -->
             <div class="input-group">
                 <label>Thumbnail URL</label>
                 <input type="text" id="storyThumb" class="thumb-input" placeholder="https://...">
             </div>
 
-            <!-- Toolbar -->
             <div class="toolbar" id="editorToolbar">
                 <button type="button" data-cmd="formatBlock" data-val="h1" title="Heading 1">H1</button>
                 <button type="button" data-cmd="formatBlock" data-val="h2" title="Heading 2">H2</button>
                 <button type="button" data-cmd="formatBlock" data-val="h3" title="Heading 3">H3</button>
-                <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraf / Body">Body</button>
+                <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraf">Body</button>
                 <span class="toolbar-sep"></span>
                 <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
                 <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
                 <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
                 <span class="toolbar-sep"></span>
                 <button type="button" id="insertImageBtn" title="Sisipkan Gambar">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                         <circle cx="8.5" cy="8.5" r="1.5"/>
                         <polyline points="21 15 16 10 5 21"/>
                     </svg>
                 </button>
-                <button type="button" id="insertDividerBtn" title="Sisipkan Pembatas">—</button>
+                <button type="button" id="insertDividerBtn" title="Sisipkan Pembatas">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Editor Area -->
             <div id="editorContent" contenteditable="true" class="editor-area content-justify" 
                  data-placeholder="Mulai menulis cerita di sini..."></div>
 
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="editor-footer" id="editorFooter">
         <div class="footer-stats">
             <span id="wordCount">0 kata</span>
             <span class="dot">•</span>
             <span id="charCount">0 karakter</span>
         </div>
-        <button id="saveDraftBtn" class="draft-btn">💾 Simpan Draft</button>
+        <button id="saveDraftBtn" class="draft-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Simpan Draft
+        </button>
     </footer>
 
-    <!-- Toast -->
     <div id="toast" class="toast"></div>
 
     <script src="../js/api.js"></script>
