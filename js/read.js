@@ -85,12 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (chapData) {
             headerTitle.textContent = currentSeries.title;
-            readContent.innerHTML = `
-                <h1>${chapData.title}</h1>
-                <p class="chapter-meta">${currentSeries.title} — Bab ${chapData.chapter}</p>
-                <div>${chapData.content}</div>
-            `;
-            chapterIndicator.textContent = `Bab ${chapData.chapter}`;
+            readContent.innerHTML = chapData.content;
+            chapterIndicator.textContent = chapData.chapter;
         }
     }
 
