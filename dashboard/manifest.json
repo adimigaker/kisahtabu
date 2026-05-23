@@ -2,7 +2,7 @@
     "name": "Dashboard Tabu",
     "short_name": "Dashboard Tabu",
     "description": "Platform berbagi cerita bersambung",
-    "start_url": "/index.html",
+    "start_url": "/dashboard/index.html",
     "display": "standalone",
     "background_color": "#fafaf9",
     "theme_color": "#ffffff",
