@@ -1,18 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
-    var seriesIdParam = urlParams.get('id');
-    var chapterParam = urlParams.get('chapter');
+    var editId = urlParams.get('id');
     var isNew = urlParams.get('new') === 'true';
 
-    var currentId = seriesIdParam || '';
-    var currentChapter = chapterParam || '01';
+    var currentId = editId || '';
+    var originalId = editId || '';
 
-    // DOM
     var headerIdChapter = document.getElementById('headerIdChapter');
     var editIdChapterBtn = document.getElementById('editIdChapterBtn');
     var idChapterEdit = document.getElementById('idChapterEdit');
     var editSeriesId = document.getElementById('editSeriesId');
-    var editChapterNum = document.getElementById('editChapterNum');
     var saveIdChapterBtn = document.getElementById('saveIdChapterBtn');
     var cancelIdChapterBtn = document.getElementById('cancelIdChapterBtn');
     var storyTitle = document.getElementById('storyTitle');
@@ -25,13 +22,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var charCount = document.getElementById('charCount');
     var toast = document.getElementById('toast');
 
-    // Thumbnail elements
     var uploadThumbBtn = document.getElementById('uploadThumbBtn');
     var thumbPreview = document.getElementById('thumbPreview');
     var thumbPreviewImg = document.getElementById('thumbPreviewImg');
     var removeThumbBtn = document.getElementById('removeThumbBtn');
 
-    // ========== SVG ICONS ==========
     var svg = {
         spinner: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
         check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -42,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         x: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
     };
 
-    // ========== TOAST ==========
     function showToast(icon, msg) {
         if (!toast) return;
         toast.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">' + icon + ' ' + msg + '</span>';
@@ -51,16 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
         toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, 2000);
     }
 
-    // ========== THUMBNAIL ==========
     function updateThumbPreview() {
         var url = storyThumb.value.trim();
-        if (url) {
-            thumbPreview.style.display = 'inline-block';
-            thumbPreviewImg.src = url;
-        } else {
-            thumbPreview.style.display = 'none';
-            thumbPreviewImg.src = '';
-        }
+        if (url) { thumbPreview.style.display = 'inline-block'; thumbPreviewImg.src = url; }
+        else { thumbPreview.style.display = 'none'; thumbPreviewImg.src = ''; }
     }
 
     storyThumb.addEventListener('input', updateThumbPreview);
@@ -69,90 +57,63 @@ document.addEventListener('DOMContentLoaded', function() {
     uploadThumbBtn.addEventListener('click', async function(e) {
         e.preventDefault();
         var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
+        input.type = 'file'; input.accept = 'image/*';
         input.onchange = async function() {
             var file = input.files[0];
             if (!file) return;
             if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
             showToast(svg.upload, 'Upload thumbnail...');
             var result = await API.uploadImage(file);
-            if (result.success) {
-                storyThumb.value = result.url;
-                updateThumbPreview();
-                showToast(svg.check, 'Thumbnail terupload!');
-                saveDraftAuto();
-            } else {
-                showToast(svg.x, 'Gagal upload thumbnail');
-            }
+            if (result.success) { storyThumb.value = result.url; updateThumbPreview(); showToast(svg.check, 'Thumbnail terupload!'); saveDraftAuto(); }
+            else showToast(svg.x, 'Gagal upload');
         };
         input.click();
     });
 
-    removeThumbBtn.addEventListener('click', function() {
-        storyThumb.value = '';
-        updateThumbPreview();
-        saveDraftAuto();
-    });
+    removeThumbBtn.addEventListener('click', function() { storyThumb.value = ''; updateThumbPreview(); saveDraftAuto(); });
 
-    // ========== LOAD STORY ==========
     async function loadStory() {
         if (isNew) {
             var info = JSON.parse(sessionStorage.getItem('newStoryInfo') || '{}');
-            if (info.id) currentId = info.id;
-            if (info.chapter) currentChapter = info.chapter;
+            if (info.id) { currentId = info.id; originalId = info.id; }
             if (info.title) storyTitle.value = info.title;
             sessionStorage.removeItem('newStoryInfo');
-        } else if (seriesIdParam) {
+        } else if (editId) {
             try {
-                var story = await API.getStory(seriesIdParam);
+                var stories = await API.getAllStories();
+                var story = stories.find(function(s) { return s.id === editId; });
                 if (story) {
                     currentId = story.id;
+                    originalId = story.id;
                     storyTitle.value = story.title || '';
                     storyThumb.value = story.thumbnail || '';
+                    editorContent.innerHTML = story.content || '';
                     updateThumbPreview();
-                    var chapters = await API.getChapterList(seriesIdParam);
-                    if (chapters && chapters.length > 0) {
-                        var lastChap = chapters[chapters.length - 1];
-                        currentChapter = lastChap.chapter;
-                        var chapData = await API.getChapter(seriesIdParam, lastChap.chapter);
-                        if (chapData) editorContent.innerHTML = chapData.content || '';
-                    }
                 }
-            } catch (err) { console.error('Gagal load:', err); }
+            } catch (err) {}
         }
-        
         var draft = JSON.parse(localStorage.getItem('draft_' + currentId));
         if (draft && draft.content) {
             editorContent.innerHTML = draft.content;
             if (draft.title) storyTitle.value = draft.title;
             if (draft.thumb) { storyThumb.value = draft.thumb; updateThumbPreview(); }
         }
-        
         updateHeaderDisplay();
         updateStats();
     }
 
-    function updateHeaderDisplay() {
-        headerIdChapter.textContent = (currentId || 'ID') + '-' + (currentChapter || '01');
-    }
+    function updateHeaderDisplay() { headerIdChapter.textContent = currentId || 'ID-01'; }
 
-    // ========== ID-CHAPTER EDIT ==========
     editIdChapterBtn.addEventListener('click', function() {
         editSeriesId.value = currentId;
-        editChapterNum.value = currentChapter;
         idChapterEdit.style.display = 'block';
         editSeriesId.focus();
-        editSeriesId.select();
     });
 
     saveIdChapterBtn.addEventListener('click', function() {
         var newId = editSeriesId.value.trim().toUpperCase();
-        var newChapter = editChapterNum.value.trim();
         if (!newId) { showToast(svg.alert, 'ID tidak boleh kosong'); return; }
-        if (!newChapter) { showToast(svg.alert, 'Chapter tidak boleh kosong'); return; }
         currentId = newId;
-        currentChapter = newChapter;
         updateHeaderDisplay();
         idChapterEdit.style.display = 'none';
         showToast(svg.check, 'Tersimpan');
@@ -161,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cancelIdChapterBtn.addEventListener('click', function() { idChapterEdit.style.display = 'none'; });
 
-    // ========== TOOLBAR ==========
     function getCurrentBlockTag() {
         var sel = window.getSelection();
         if (sel.rangeCount === 0) return '';
@@ -172,79 +132,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateToolbarState() {
-        var buttons = editorToolbar.querySelectorAll('button[data-cmd]');
-        for (var i = 0; i < buttons.length; i++) {
-            var btn = buttons[i];
-            var cmd = btn.dataset.cmd;
-            var val = btn.dataset.val;
-            if (cmd === 'formatBlock' && val) {
-                btn.classList.toggle('active', getCurrentBlockTag() === val.toUpperCase());
-            } else {
-                btn.classList.toggle('active', document.queryCommandState(cmd));
-            }
-        }
-    }
-
-    var toolbarBtns = editorToolbar.querySelectorAll('button[data-cmd]');
-    for (var j = 0; j < toolbarBtns.length; j++) {
-        toolbarBtns[j].addEventListener('click', function(e) {
-            e.preventDefault();
-            var cmd = this.dataset.cmd;
-            var val = this.dataset.val || null;
-            if (cmd === 'formatBlock') {
-                var current = getCurrentBlockTag();
-                document.execCommand(cmd, false, current === val.toUpperCase() ? 'p' : val);
-            } else {
-                document.execCommand(cmd, false, null);
-                this.classList.toggle('active', document.queryCommandState(cmd));
-            }
-            editorContent.focus();
-            updateStats();
-            saveDraftAuto();
+        editorToolbar.querySelectorAll('button[data-cmd]').forEach(function(btn) {
+            var cmd = btn.dataset.cmd, val = btn.dataset.val;
+            if (cmd === 'formatBlock' && val) btn.classList.toggle('active', getCurrentBlockTag() === val.toUpperCase());
+            else btn.classList.toggle('active', document.queryCommandState(cmd));
         });
     }
 
+    editorToolbar.querySelectorAll('button[data-cmd]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var cmd = this.dataset.cmd, val = this.dataset.val || null;
+            if (cmd === 'formatBlock') {
+                var current = getCurrentBlockTag();
+                document.execCommand(cmd, false, current === val.toUpperCase() ? 'p' : val);
+            } else { document.execCommand(cmd, false, null); this.classList.toggle('active', document.queryCommandState(cmd)); }
+            editorContent.focus(); updateStats(); saveDraftAuto();
+        });
+    });
+
     editorContent.addEventListener('keyup', function() { updateToolbarState(); updateStats(); saveDraftAuto(); });
     editorContent.addEventListener('mouseup', updateToolbarState);
-
     editorContent.addEventListener('paste', function(e) {
         e.preventDefault();
         var text = (e.clipboardData || window.clipboardData).getData('text/plain');
         if (!text.trim()) return;
-        var paragraphs = text.split('\n').filter(function(p) { return p.trim(); });
-        var html = '';
-        for (var k = 0; k < paragraphs.length; k++) { html += '<p>' + paragraphs[k] + '</p>'; }
+        var html = text.split('\n').filter(function(p) { return p.trim(); }).map(function(p) { return '<p>' + p + '</p>'; }).join('');
         document.execCommand('insertHTML', false, html);
-        updateStats();
-        saveDraftAuto();
+        updateStats(); saveDraftAuto();
     });
 
-    // ========== INSERT IMAGE ==========
     document.getElementById('insertImageBtn').addEventListener('click', function(e) {
         e.preventDefault();
         var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
+        input.type = 'file'; input.accept = 'image/*';
         input.onchange = async function() {
             var file = input.files[0];
             if (!file) return;
             if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
             showToast(svg.upload, 'Upload...');
             var result = await API.uploadImage(file);
-            if (result.success) {
-                editorContent.focus();
-                document.execCommand('insertImage', false, result.url);
-                showToast(svg.check, 'Terupload!');
-                updateStats();
-                saveDraftAuto();
-            } else {
-                showToast(svg.x, 'Gagal upload');
-            }
+            if (result.success) { editorContent.focus(); document.execCommand('insertImage', false, result.url); showToast(svg.check, 'Terupload!'); updateStats(); saveDraftAuto(); }
+            else showToast(svg.x, 'Gagal upload');
         };
         input.click();
     });
 
-    // ========== INSERT DIVIDER ==========
+    // ========== INSERT DIVIDER (HR ONLY - CSS HANDLES STYLE) ==========
     document.getElementById('insertDividerBtn').addEventListener('click', function(e) {
         e.preventDefault();
         editorContent.focus();
@@ -253,30 +187,22 @@ document.addEventListener('DOMContentLoaded', function() {
         saveDraftAuto();
     });
 
-    // ========== STATS ==========
     function updateStats() {
         var text = editorContent.innerText || '';
-        var words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        wordCount.textContent = words + ' kata';
+        wordCount.textContent = (text.trim() ? text.trim().split(/\s+/).length : 0) + ' kata';
         charCount.textContent = text.length + ' karakter';
     }
 
-    // ========== DRAFT ==========
     function saveDraftAuto() {
         if (!currentId) return;
         localStorage.setItem('draft_' + currentId, JSON.stringify({
-            id: currentId, chapter: currentChapter,
-            title: storyTitle.value, thumb: storyThumb.value,
+            id: currentId, title: storyTitle.value, thumb: storyThumb.value,
             content: editorContent.innerHTML, timestamp: Date.now()
         }));
     }
 
-    saveDraftBtn.addEventListener('click', function() {
-        saveDraftAuto();
-        showToast(svg.save, 'Draft tersimpan');
-    });
+    saveDraftBtn.addEventListener('click', function() { saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); });
 
-    // ========== PUBLISH ==========
     publishBtn.addEventListener('click', async function() {
         if (!currentId) { showToast(svg.alert, 'Isi ID dulu!'); editIdChapterBtn.click(); return; }
         var title = storyTitle.value.trim();
@@ -286,27 +212,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         publishBtn.innerHTML = svg.spinner + ' Menyimpan...';
         publishBtn.disabled = true;
-        showToast(svg.send, 'Mengirim ke server...');
 
         try {
-            var chapters = await API.getChapterList(currentId);
-            var chapterList = [];
-            if (chapters && chapters.length > 0) {
-                for (var i = 0; i < chapters.length; i++) {
-                    chapterList.push({ chapter: chapters[i].chapter, title: chapters[i].title, content: '' });
-                }
+            if (originalId && currentId !== originalId) {
+                await API.deleteStory(originalId);
+                localStorage.removeItem('draft_' + originalId);
             }
-            var newChap = { chapter: currentChapter, title: title, content: content };
-            var found = false;
-            for (var j = 0; j < chapterList.length; j++) {
-                if (chapterList[j].chapter === currentChapter) { chapterList[j] = newChap; found = true; break; }
-            }
-            if (!found) chapterList.push(newChap);
-
-            var result = await API.saveStory({ id: currentId, title: title, thumbnail: storyThumb.value.trim(), chapters: chapterList });
+            
+            var result = await API.saveStory({ id: currentId, title: title, thumbnail: storyThumb.value.trim(), content: content });
 
             if (result.success) {
                 localStorage.removeItem('draft_' + currentId);
+                originalId = currentId;
                 publishBtn.innerHTML = svg.check + ' Berhasil!';
                 showToast(svg.check, 'Cerita berhasil diterbitkan!');
                 setTimeout(function() { window.location.href = 'index.html'; }, 1500);
@@ -320,13 +237,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ========== SHORTCUT ==========
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); }
         if (e.key === 'Escape' && idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
     });
 
-    // ========== INIT ==========
     loadStory();
     updateHeaderDisplay();
     updateToolbarState();
