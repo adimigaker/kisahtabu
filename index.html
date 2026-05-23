@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- Theme Color Dinamis -->
+<meta name="theme-color" content="#fafaf9" id="themeColor">
+<meta name="color-scheme" content="light dark">
     <title>Kisah Tabu</title>
     
     <!-- PWA Meta -->
@@ -66,5 +69,22 @@
             navigator.serviceWorker.register('/sw.js');
         }
     </script>
+<script>
+    // Deteksi preferensi dark mode
+    function setTheme() {
+        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var themeColor = document.getElementById('themeColor');
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            themeColor.setAttribute('content', '#1a1a1a');
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeColor.setAttribute('content', '#fafaf9');
+        }
+    }
+    
+    setTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
+</script>
 </body>
 </html>
