@@ -102,7 +102,7 @@ body {
     border-radius: 8px;
 }
 
-/* ========== DIVIDER - CSS ONLY ========== */
+/* ========== DIVIDER ========== */
 .read-content hr {
     display: block;
     border: none;
@@ -118,15 +118,35 @@ body {
 }
 
 .read-content hr::before,
-.read-content hr::after {
-    display: none;
-    content: none;
+.read-content hr::after { display: none; content: none; }
+
+/* ========== HIDE EDITOR ELEMENTS IN READ ========== */
+.read-content .image-block,
+.read-content .image-block-header,
+.read-content .image-block-body,
+.read-content .image-block-inputs,
+.read-content .image-block-url,
+.read-content .image-block-upload-btn,
+.read-content .image-block-preview,
+.read-content .image-block-insert-btn,
+.read-content .image-block-remove,
+.read-content .image-remove-btn {
+    display: none !important;
 }
 
-/* Hapus SVG divider yang mungkin ada di dalam konten */
-.read-content svg {
+.read-content .image-wrapper {
+    position: relative;
+    display: block;
+    margin: 1.5rem auto;
+    text-align: center;
     max-width: 100%;
-    height: auto;
+}
+
+.read-content .image-wrapper img {
+    display: block;
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 0 auto;
 }
 
 .read-footer {
