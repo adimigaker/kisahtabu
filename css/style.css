@@ -449,3 +449,57 @@ main {
     display: block;
     margin: 0 auto 0.8rem;
 }
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1a1a1a;
+        --card: #2a2a2a;
+        --border: #333;
+        --text: #e0e0e0;
+        --text-light: #999;
+        --text-muted: #777;
+    }
+    
+    body {
+        background: var(--bg);
+        color: var(--text);
+    }
+    
+    .main-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+    
+    .main-footer {
+        background: #1a1a1a;
+        border-top-color: #333;
+    }
+    
+    .story-card {
+        background: #2a2a2a;
+        border-color: #333;
+    }
+    
+    .search-bar input {
+        background: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .search-bar input::placeholder {
+        color: #666;
+    }
+    
+    .footer-btn {
+        color: #777;
+    }
+    
+    .footer-btn.active {
+        color: #ccc;
+    }
+    
+    .footer-btn.active::after {
+        background: #ccc;
+    }
+}
