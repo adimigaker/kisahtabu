@@ -27,21 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var thumbPreviewImg = document.getElementById('thumbPreviewImg');
     var removeThumbBtn = document.getElementById('removeThumbBtn');
 
-    // Image Modal
-    var imageModal = document.getElementById('imageModal');
-    var closeImageModal = document.getElementById('closeImageModal');
-    var imageTabs = document.querySelectorAll('.image-tab');
-    var tabUrl = document.getElementById('tabUrl');
-    var tabUpload = document.getElementById('tabUpload');
-    var imageUrlInput = document.getElementById('imageUrlInput');
-    var insertUrlBtn = document.getElementById('insertUrlBtn');
-    var uploadArea = document.getElementById('uploadArea');
-    var imageFileInput = document.getElementById('imageFileInput');
-    var imagePreview = document.getElementById('imagePreview');
-    var imagePreviewImg = document.getElementById('imagePreviewImg');
-    var removeImagePreview = document.getElementById('removeImagePreview');
-    var pendingImageUrl = '';
-
     var svg = {
         spinner: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
         check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -186,87 +171,142 @@ document.addEventListener('DOMContentLoaded', function() {
         saveDraftAuto();
     });
 
-    // ========== IMAGE MODAL ==========
+    // ========== INSERT IMAGE (INLINE BLOCK) ==========
     document.getElementById('insertImageBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        imageModal.style.display = 'flex';
-        imageUrlInput.value = '';
-        pendingImageUrl = '';
-        imagePreview.style.display = 'none';
-        imagePreviewImg.src = '';
-        imageTabs.forEach(function(t) { t.classList.remove('active'); });
-        imageTabs[0].classList.add('active');
-        tabUrl.style.display = 'block';
-        tabUpload.style.display = 'none';
-        setTimeout(function() { imageUrlInput.focus(); }, 100);
+        editorContent.focus();
+        
+        var sel = window.getSelection();
+        if (sel.rangeCount === 0) return;
+        var range = sel.getRangeAt(0);
+        
+        var imageBlock = document.createElement('div');
+        imageBlock.className = 'image-block';
+        imageBlock.contentEditable = 'false';
+        imageBlock.innerHTML = 
+            '<div class="image-block-header">' +
+            '<span class="image-block-title">Sisipkan Gambar</span>' +
+            '<button class="image-block-remove" title="Hapus">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+            '</svg></button></div>' +
+            '<div class="image-block-body">' +
+            '<div class="image-block-inputs">' +
+            '<input type="text" class="image-block-url" placeholder="https://... atau pilih gambar">' +
+            '<button class="image-block-upload-btn">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>' +
+            '</svg> Upload</button></div>' +
+            '<div class="image-block-preview" style="display:none;">' +
+            '<img class="image-block-preview-img" src="" alt="Preview">' +
+            '<button class="image-block-insert-btn">Sisipkan ke konten</button></div></div>';
+        
+        range.insertNode(imageBlock);
+        range.setStartAfter(imageBlock);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        
+        setupImageBlock(imageBlock);
+        updateStats();
+        saveDraftAuto();
     });
 
-    closeImageModal.addEventListener('click', function() { imageModal.style.display = 'none'; });
-    imageModal.addEventListener('click', function(e) { if (e.target === imageModal) imageModal.style.display = 'none'; });
-
-    imageTabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            imageTabs.forEach(function(t) { t.classList.remove('active'); });
-            this.classList.add('active');
-            if (this.dataset.tab === 'url') { tabUrl.style.display = 'block'; tabUpload.style.display = 'none'; }
-            else { tabUrl.style.display = 'none'; tabUpload.style.display = 'block'; }
+    function setupImageBlock(block) {
+        var urlInput = block.querySelector('.image-block-url');
+        var uploadBtn = block.querySelector('.image-block-upload-btn');
+        var previewDiv = block.querySelector('.image-block-preview');
+        var previewImg = block.querySelector('.image-block-preview-img');
+        var insertBtn = block.querySelector('.image-block-insert-btn');
+        var removeBtn = block.querySelector('.image-block-remove');
+        var pendingUrl = '';
+        
+        urlInput.addEventListener('input', function() {
+            var url = urlInput.value.trim();
+            if (url) { pendingUrl = url; previewImg.src = url; previewDiv.style.display = 'block'; }
+            else { pendingUrl = ''; previewDiv.style.display = 'none'; }
         });
-    });
-
-    insertUrlBtn.addEventListener('click', function() {
-        var url = imageUrlInput.value.trim();
-        if (!url) { showToast(svg.alert, 'URL tidak boleh kosong'); return; }
-        pendingImageUrl = url;
-        imagePreviewImg.src = url;
-        imagePreview.style.display = 'inline-block';
-    });
-
-    imageUrlInput.addEventListener('input', function() {
-        var url = imageUrlInput.value.trim();
-        if (url) { pendingImageUrl = url; imagePreviewImg.src = url; imagePreview.style.display = 'inline-block'; }
-        else { imagePreview.style.display = 'none'; }
-    });
-
-    uploadArea.addEventListener('click', function() { imageFileInput.click(); });
-
-    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#333'; this.style.background = '#f0f0f0'; });
-    uploadArea.addEventListener('dragleave', function() { this.style.borderColor = '#ddd'; this.style.background = '#fafafa'; });
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.style.borderColor = '#ddd';
-        this.style.background = '#fafafa';
-        var file = e.dataTransfer.files[0];
-        if (file) handleImageFile(file);
-    });
-
-    imageFileInput.addEventListener('change', function() { var file = this.files[0]; if (file) handleImageFile(file); });
-
-    async function handleImageFile(file) {
-        if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
-        showToast(svg.upload, 'Upload...');
-        var result = await API.uploadImage(file);
-        if (result.success) { pendingImageUrl = result.url; imagePreviewImg.src = result.url; imagePreview.style.display = 'inline-block'; showToast(svg.check, 'Terupload!'); }
-        else showToast(svg.x, 'Gagal upload');
+        
+        urlInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var url = urlInput.value.trim();
+                if (url) { pendingUrl = url; previewImg.src = url; previewDiv.style.display = 'block'; insertImageFromBlock(block, url); }
+            }
+        });
+        
+        uploadBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            var input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*';
+            input.onchange = async function() {
+                var file = input.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
+                uploadBtn.textContent = 'Upload...'; uploadBtn.disabled = true;
+                var result = await API.uploadImage(file);
+                uploadBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload';
+                uploadBtn.disabled = false;
+                if (result.success) { pendingUrl = result.url; previewImg.src = result.url; previewDiv.style.display = 'block'; urlInput.value = result.url; }
+                else showToast(svg.x, 'Gagal upload');
+            };
+            input.click();
+        });
+        
+        insertBtn.addEventListener('click', function() { if (pendingUrl) insertImageFromBlock(block, pendingUrl); });
+        previewImg.addEventListener('click', function() { if (pendingUrl) insertImageFromBlock(block, pendingUrl); });
+        
+        removeBtn.addEventListener('click', function() {
+            block.remove();
+            updateStats();
+            saveDraftAuto();
+        });
+        
+        setTimeout(function() { urlInput.focus(); }, 100);
     }
 
-    removeImagePreview.addEventListener('click', function() {
-        pendingImageUrl = ''; imagePreview.style.display = 'none'; imagePreviewImg.src = ''; imageUrlInput.value = '';
-    });
-
-    imagePreviewImg.addEventListener('click', function() { if (pendingImageUrl) insertImageToEditor(pendingImageUrl); });
-    imagePreviewImg.addEventListener('dblclick', function() { if (pendingImageUrl) insertImageToEditor(pendingImageUrl); });
-
-    function insertImageToEditor(url) {
-        imageModal.style.display = 'none';
+    function insertImageFromBlock(block, url) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
+        wrapper.contentEditable = 'false';
+        
+        var img = document.createElement('img');
+        img.src = url;
+        img.setAttribute('data-inserted', 'true');
+        
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'image-remove-btn';
+        removeBtn.title = 'Hapus gambar';
+        removeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        
+        removeBtn.addEventListener('mouseenter', function() { this.style.transform = 'scale(1.15)'; });
+        removeBtn.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
+        
+        removeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            wrapper.remove();
+            editorContent.focus();
+            updateStats();
+            saveDraftAuto();
+        });
+        
+        wrapper.appendChild(img);
+        wrapper.appendChild(removeBtn);
+        
+        block.parentNode.replaceChild(wrapper, block);
+        
+        var sel = window.getSelection();
+        var range = document.createRange();
+        range.setStartAfter(wrapper);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        
         editorContent.focus();
-        document.execCommand('insertImage', false, url);
         updateStats();
         saveDraftAuto();
     }
-
-    imageUrlInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); var url = imageUrlInput.value.trim(); if (url) insertImageToEditor(url); }
-    });
 
     // ========== STATS ==========
     function updateStats() {
@@ -317,10 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); }
-        if (e.key === 'Escape') {
-            if (imageModal.style.display === 'flex') imageModal.style.display = 'none';
-            if (idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
-        }
+        if (e.key === 'Escape' && idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
     });
 
     loadStory();
