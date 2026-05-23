@@ -17,7 +17,7 @@
         </a>
         <div class="header-center">
             <span class="header-id" id="headerIdChapter">ID-01</span>
-            <button id="editIdChapterBtn" class="icon-btn" title="Edit ID/Chapter">
+            <button id="editIdChapterBtn" class="icon-btn" title="Edit ID">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -37,16 +37,9 @@
         <div class="editor-container">
             
             <div id="idChapterEdit" class="id-chapter-edit" style="display:none;">
-                <div class="id-chapter-row">
-                    <div class="input-group" style="flex:7;">
-                        <label>ID Series</label>
-                        <input type="text" id="editSeriesId" placeholder="ELIZA" style="text-transform:uppercase;">
-                    </div>
-                    <span class="id-separator">-</span>
-                    <div class="input-group" style="flex:3;">
-                        <label>Chapter</label>
-                        <input type="text" id="editChapterNum" placeholder="01" inputmode="numeric">
-                    </div>
+                <div class="input-group">
+                    <label>ID Cerita (contoh: ELZ-01)</label>
+                    <input type="text" id="editSeriesId" placeholder="ELZ-01" style="text-transform:uppercase;">
                 </div>
                 <div class="edit-actions">
                     <button id="saveIdChapterBtn" class="action-btn save-btn">
@@ -140,7 +133,7 @@
 
     <div id="toast" class="toast"></div>
 
-    <script src="/js/api.js"></script>
+    <script src="../js/api.js"></script>
     <script src="js/editor.js"></script>
 </body>
 </html>
