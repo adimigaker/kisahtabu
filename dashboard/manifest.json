@@ -1,6 +1,6 @@
 {
-    "name": "Kisah Tabu",
-    "short_name": "Kisah Tabu",
+    "name": "Dashboard",
+    "short_name": "Dashboard",
     "description": "Platform berbagi cerita bersambung",
     "start_url": "/dashboard/index.html",
     "display": "standalone",
