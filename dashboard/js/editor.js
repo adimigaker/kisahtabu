@@ -27,6 +27,21 @@ document.addEventListener('DOMContentLoaded', function() {
     var thumbPreviewImg = document.getElementById('thumbPreviewImg');
     var removeThumbBtn = document.getElementById('removeThumbBtn');
 
+    // Image Modal
+    var imageModal = document.getElementById('imageModal');
+    var closeImageModal = document.getElementById('closeImageModal');
+    var imageTabs = document.querySelectorAll('.image-tab');
+    var tabUrl = document.getElementById('tabUrl');
+    var tabUpload = document.getElementById('tabUpload');
+    var imageUrlInput = document.getElementById('imageUrlInput');
+    var insertUrlBtn = document.getElementById('insertUrlBtn');
+    var uploadArea = document.getElementById('uploadArea');
+    var imageFileInput = document.getElementById('imageFileInput');
+    var imagePreview = document.getElementById('imagePreview');
+    var imagePreviewImg = document.getElementById('imagePreviewImg');
+    var removeImagePreview = document.getElementById('removeImagePreview');
+    var pendingImageUrl = '';
+
     var svg = {
         spinner: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
         check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -162,23 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateStats(); saveDraftAuto();
     });
 
-    document.getElementById('insertImageBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        var input = document.createElement('input');
-        input.type = 'file'; input.accept = 'image/*';
-        input.onchange = async function() {
-            var file = input.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
-            showToast(svg.upload, 'Upload...');
-            var result = await API.uploadImage(file);
-            if (result.success) { editorContent.focus(); document.execCommand('insertImage', false, result.url); showToast(svg.check, 'Terupload!'); updateStats(); saveDraftAuto(); }
-            else showToast(svg.x, 'Gagal upload');
-        };
-        input.click();
-    });
-
-    // ========== INSERT DIVIDER (HR ONLY - CSS HANDLES STYLE) ==========
+    // ========== INSERT DIVIDER ==========
     document.getElementById('insertDividerBtn').addEventListener('click', function(e) {
         e.preventDefault();
         editorContent.focus();
@@ -187,6 +186,89 @@ document.addEventListener('DOMContentLoaded', function() {
         saveDraftAuto();
     });
 
+    // ========== IMAGE MODAL ==========
+    document.getElementById('insertImageBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        imageModal.style.display = 'flex';
+        imageUrlInput.value = '';
+        pendingImageUrl = '';
+        imagePreview.style.display = 'none';
+        imagePreviewImg.src = '';
+        imageTabs.forEach(function(t) { t.classList.remove('active'); });
+        imageTabs[0].classList.add('active');
+        tabUrl.style.display = 'block';
+        tabUpload.style.display = 'none';
+        setTimeout(function() { imageUrlInput.focus(); }, 100);
+    });
+
+    closeImageModal.addEventListener('click', function() { imageModal.style.display = 'none'; });
+    imageModal.addEventListener('click', function(e) { if (e.target === imageModal) imageModal.style.display = 'none'; });
+
+    imageTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            imageTabs.forEach(function(t) { t.classList.remove('active'); });
+            this.classList.add('active');
+            if (this.dataset.tab === 'url') { tabUrl.style.display = 'block'; tabUpload.style.display = 'none'; }
+            else { tabUrl.style.display = 'none'; tabUpload.style.display = 'block'; }
+        });
+    });
+
+    insertUrlBtn.addEventListener('click', function() {
+        var url = imageUrlInput.value.trim();
+        if (!url) { showToast(svg.alert, 'URL tidak boleh kosong'); return; }
+        pendingImageUrl = url;
+        imagePreviewImg.src = url;
+        imagePreview.style.display = 'inline-block';
+    });
+
+    imageUrlInput.addEventListener('input', function() {
+        var url = imageUrlInput.value.trim();
+        if (url) { pendingImageUrl = url; imagePreviewImg.src = url; imagePreview.style.display = 'inline-block'; }
+        else { imagePreview.style.display = 'none'; }
+    });
+
+    uploadArea.addEventListener('click', function() { imageFileInput.click(); });
+
+    uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#333'; this.style.background = '#f0f0f0'; });
+    uploadArea.addEventListener('dragleave', function() { this.style.borderColor = '#ddd'; this.style.background = '#fafafa'; });
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.background = '#fafafa';
+        var file = e.dataTransfer.files[0];
+        if (file) handleImageFile(file);
+    });
+
+    imageFileInput.addEventListener('change', function() { var file = this.files[0]; if (file) handleImageFile(file); });
+
+    async function handleImageFile(file) {
+        if (file.size > 5 * 1024 * 1024) { showToast(svg.alert, 'Maks 5MB'); return; }
+        showToast(svg.upload, 'Upload...');
+        var result = await API.uploadImage(file);
+        if (result.success) { pendingImageUrl = result.url; imagePreviewImg.src = result.url; imagePreview.style.display = 'inline-block'; showToast(svg.check, 'Terupload!'); }
+        else showToast(svg.x, 'Gagal upload');
+    }
+
+    removeImagePreview.addEventListener('click', function() {
+        pendingImageUrl = ''; imagePreview.style.display = 'none'; imagePreviewImg.src = ''; imageUrlInput.value = '';
+    });
+
+    imagePreviewImg.addEventListener('click', function() { if (pendingImageUrl) insertImageToEditor(pendingImageUrl); });
+    imagePreviewImg.addEventListener('dblclick', function() { if (pendingImageUrl) insertImageToEditor(pendingImageUrl); });
+
+    function insertImageToEditor(url) {
+        imageModal.style.display = 'none';
+        editorContent.focus();
+        document.execCommand('insertImage', false, url);
+        updateStats();
+        saveDraftAuto();
+    }
+
+    imageUrlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); var url = imageUrlInput.value.trim(); if (url) insertImageToEditor(url); }
+    });
+
+    // ========== STATS ==========
     function updateStats() {
         var text = editorContent.innerText || '';
         wordCount.textContent = (text.trim() ? text.trim().split(/\s+/).length : 0) + ' kata';
@@ -218,18 +300,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 await API.deleteStory(originalId);
                 localStorage.removeItem('draft_' + originalId);
             }
-            
             var result = await API.saveStory({ id: currentId, title: title, thumbnail: storyThumb.value.trim(), content: content });
-
             if (result.success) {
                 localStorage.removeItem('draft_' + currentId);
                 originalId = currentId;
                 publishBtn.innerHTML = svg.check + ' Berhasil!';
                 showToast(svg.check, 'Cerita berhasil diterbitkan!');
                 setTimeout(function() { window.location.href = 'index.html'; }, 1500);
-            } else {
-                throw new Error(result.error || 'Gagal');
-            }
+            } else { throw new Error(result.error || 'Gagal'); }
         } catch (err) {
             publishBtn.innerHTML = svg.send + ' Terbitkan';
             publishBtn.disabled = false;
@@ -239,7 +317,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); }
-        if (e.key === 'Escape' && idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
+        if (e.key === 'Escape') {
+            if (imageModal.style.display === 'flex') imageModal.style.display = 'none';
+            if (idChapterEdit.style.display === 'block') idChapterEdit.style.display = 'none';
+        }
     });
 
     loadStory();
