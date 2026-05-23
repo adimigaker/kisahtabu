@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -367,4 +366,86 @@ main {
     .story-card .thumbnail {
         width: 60px;
     }
+}
+
+/* ========== SPINNER ========== */
+.spin {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #aaa;
+}
+
+.loading-state svg {
+    display: block;
+    margin: 0 auto 0.5rem;
+}
+
+/* ========== PULL TO REFRESH ========== */
+.pull-indicator {
+    text-align: center;
+    padding: 0;
+    color: #aaa;
+    font-size: 0.8rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+}
+
+.pull-indicator.show {
+    padding: 1rem;
+    max-height: 80px;
+    opacity: 1;
+}
+
+.pull-indicator svg {
+    display: block;
+    margin: 0 auto 0.3rem;
+}
+
+.pull-indicator .pull-text {
+    display: block;
+}
+
+/* ========== SPINNER ========== */
+.spin {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========== LOADING STATE ========== */
+.loading-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #aaa;
+}
+
+.loading-state svg {
+    display: block;
+    margin: 0 auto 0.5rem;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #aaa;
+}
+
+.empty-state svg {
+    display: block;
+    margin: 0 auto 0.8rem;
 }
