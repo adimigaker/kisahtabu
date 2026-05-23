@@ -23,7 +23,6 @@ body {
     flex-direction: column;
 }
 
-/* ========== HEADER ========== */
 .editor-header {
     background: #fff;
     border-bottom: 1px solid var(--border);
@@ -36,13 +35,7 @@ body {
     z-index: 100;
 }
 
-.header-center {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-}
+.header-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 
 .header-id {
     font-size: 0.85rem;
@@ -105,14 +98,7 @@ body {
 
 .publish-btn:hover { background: #219a52; }
 
-/* ========== MAIN ========== */
-.editor-main {
-    flex: 1;
-    padding: 1.5rem;
-    max-width: 800px;
-    width: 100%;
-    margin: 0 auto;
-}
+.editor-main { flex: 1; padding: 1.5rem; max-width: 800px; width: 100%; margin: 0 auto; }
 
 .editor-container {
     background: var(--card);
@@ -122,7 +108,6 @@ body {
     border: 1px solid #f0f0f0;
 }
 
-/* ========== ID-CHAPTER EDIT ========== */
 .id-chapter-edit {
     background: #fafafa;
     border: 1px solid #eee;
@@ -138,9 +123,7 @@ body {
 }
 
 .id-chapter-row { display: flex; align-items: flex-end; gap: 0.5rem; }
-
 .id-separator { font-size: 1.2rem; font-weight: bold; color: #ccc; padding-bottom: 0.45rem; }
-
 .edit-actions { display: flex; gap: 0.4rem; margin-top: 0.8rem; justify-content: flex-end; }
 
 .action-btn {
@@ -161,16 +144,9 @@ body {
 .cancel-btn { background: #eee; color: var(--text); }
 .cancel-btn:hover { background: #ddd; }
 
-/* ========== INPUTS ========== */
 .input-group { margin-bottom: 0.8rem; }
 
-.input-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 0.78rem;
-    margin-bottom: 0.2rem;
-    color: var(--text-light);
-}
+.input-group label { display: block; font-weight: 600; font-size: 0.78rem; margin-bottom: 0.2rem; color: var(--text-light); }
 
 .input-group input {
     width: 100%;
@@ -199,15 +175,8 @@ body {
 .title-input:focus { outline: none; border-bottom-color: #999; }
 .title-input::placeholder { color: #ccc; }
 
-/* ========== THUMBNAIL UPLOAD ========== */
-.thumb-upload-wrap {
-    display: flex;
-    gap: 0.4rem;
-}
-
-.thumb-upload-wrap .thumb-input {
-    flex: 1;
-}
+.thumb-upload-wrap { display: flex; gap: 0.4rem; }
+.thumb-upload-wrap .thumb-input { flex: 1; }
 
 .thumb-upload-btn {
     background: none;
@@ -222,23 +191,10 @@ body {
     flex-shrink: 0;
 }
 
-.thumb-upload-btn:hover {
-    background: #f0f0f0;
-    color: var(--text);
-    border-color: #ccc;
-}
+.thumb-upload-btn:hover { background: #f0f0f0; color: var(--text); border-color: #ccc; }
 
-.thumb-preview {
-    margin-top: 0.6rem;
-    position: relative;
-    display: inline-block;
-}
-
-.thumb-preview img {
-    max-width: 100%;
-    max-height: 120px;
-    border-radius: 6px;
-}
+.thumb-preview { margin-top: 0.6rem; position: relative; display: inline-block; }
+.thumb-preview img { max-width: 100%; max-height: 120px; border-radius: 6px; }
 
 .thumb-remove-btn {
     position: absolute;
@@ -260,7 +216,6 @@ body {
 
 .thumb-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
 
-/* ========== TOOLBAR ========== */
 .toolbar {
     display: flex;
     gap: 0.2rem;
@@ -294,7 +249,6 @@ body {
 .toolbar button.active svg { stroke: white; }
 .toolbar-sep { width: 1px; background: #eee; margin: 0 0.3rem; align-self: stretch; }
 
-/* ========== EDITOR AREA ========== */
 .editor-area {
     min-height: 400px;
     padding: 0.5rem 0;
@@ -308,7 +262,6 @@ body {
 .editor-area:empty::before { content: attr(data-placeholder); color: #ccc; font-style: italic; }
 .editor-area:focus:empty::before { color: #ddd; }
 
-/* ========== CONTENT ========== */
 .content-justify { text-align: justify; }
 .content-justify * { font-family: inherit; }
 
@@ -323,10 +276,28 @@ body {
 .content-justify i, .content-justify em { font-style: italic; }
 .content-justify u { text-decoration: underline; }
 .content-justify img { display: block; margin: 1.5rem auto; max-width: 100%; border-radius: 6px; }
-.content-justify hr { display: block; margin: 2rem auto; width: auto; border: none; text-align: center; color: #bbb; font-size: 0.9rem; letter-spacing: 3px; user-select: none; }
-.content-justify hr::before { content: '❀──────❀'; display: inline-block; }
 
-/* ========== FOOTER ========== */
+/* ========== DIVIDER - CSS ONLY ========== */
+.content-justify hr {
+    display: block;
+    border: none;
+    margin: 2rem auto;
+    padding: 0;
+    width: 100%;
+    height: 70px;
+    background: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='70' viewBox='0 0 360 70'%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='1' stroke-linecap='round' d='M10 35 C40 23, 65 47, 95 35 C115 27, 132 35, 155 35'/%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='1' stroke-linecap='round' d='M350 35 C320 23, 295 47, 265 35 C245 27, 228 35, 205 35'/%3E%3Cg transform='translate(180,35)'%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='0.85' stroke-linecap='round' stroke-linejoin='round' transform='rotate(0)' d='M0,0 C-1.50,-1.65 -4.50,-7.15 -2.50,-9.50 Q0.00,-8.00 2.50,-9.50 C4.50,-7.15 1.50,-1.65 0,0 Z'/%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='0.85' stroke-linecap='round' stroke-linejoin='round' transform='rotate(72)' d='M0,0 C-1.50,-1.65 -4.50,-7.15 -2.50,-9.50 Q0.00,-8.00 2.50,-9.50 C4.50,-7.15 1.50,-1.65 0,0 Z'/%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='0.85' stroke-linecap='round' stroke-linejoin='round' transform='rotate(144)' d='M0,0 C-1.50,-1.65 -4.50,-7.15 -2.50,-9.50 Q0.00,-8.00 2.50,-9.50 C4.50,-7.15 1.50,-1.65 0,0 Z'/%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='0.85' stroke-linecap='round' stroke-linejoin='round' transform='rotate(216)' d='M0,0 C-1.50,-1.65 -4.50,-7.15 -2.50,-9.50 Q0.00,-8.00 2.50,-9.50 C4.50,-7.15 1.50,-1.65 0,0 Z'/%3E%3Cpath fill='none' stroke='%23bbb' stroke-width='0.85' stroke-linecap='round' stroke-linejoin='round' transform='rotate(288)' d='M0,0 C-1.50,-1.65 -4.50,-7.15 -2.50,-9.50 Q0.00,-8.00 2.50,-9.50 C4.50,-7.15 1.50,-1.65 0,0 Z'/%3E%3Ccircle r='2.2' fill='none' stroke='%23bbb' stroke-width='0.8'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.content-justify hr::before,
+.content-justify hr::after {
+    display: none;
+    content: none;
+}
+
 .editor-footer {
     background: #fff;
     border-top: 1px solid var(--border);
@@ -359,7 +330,6 @@ body {
 
 .draft-btn:hover { background: #f5f5f5; color: var(--text); }
 
-/* ========== TOAST ========== */
 .toast {
     position: fixed;
     bottom: 65px;
@@ -378,11 +348,9 @@ body {
 
 .toast.show { opacity: 1; }
 
-/* ========== SPINNER ========== */
 .spin { animation: spin 1.5s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* ========== RESPONSIVE ========== */
 @media (max-width: 600px) {
     .editor-main { padding: 0.8rem; }
     .editor-container { padding: 1rem; }
@@ -392,4 +360,5 @@ body {
     .publish-btn { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
     .toolbar { top: 40px; }
     .toolbar button { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+    .content-justify hr { height: 50px; margin: 1.5rem auto; }
 }
