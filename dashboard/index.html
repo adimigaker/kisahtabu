@@ -53,15 +53,9 @@
             </button>
             <h2>Cerita Baru</h2>
             <form id="newStoryForm">
-                <div class="id-chapter-row">
-                    <div class="input-group" style="flex:7;">
-                        <label>ID Series</label>
-                        <input type="text" id="popupId" required placeholder="ELIZA" style="text-transform:uppercase;">
-                    </div>
-                    <div class="input-group" style="flex:3;">
-                        <label>Chapter</label>
-                        <input type="text" id="popupChapter" required placeholder="01" inputmode="numeric">
-                    </div>
+                <div class="input-group">
+                    <label>ID Cerita (contoh: ELZ-01)</label>
+                    <input type="text" id="popupId" required placeholder="ELZ-01" style="text-transform:uppercase;">
                 </div>
                 <div class="input-group">
                     <label>Judul Cerita</label>
@@ -106,7 +100,7 @@
     <!-- Toast -->
     <div id="toast" class="toast-notif"></div>
 
-    <script src="/js/api.js"></script>
+    <script src="../js/api.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>
