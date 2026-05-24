@@ -4,26 +4,22 @@ var API_CONFIG = {
 };
 
 var API = {
-  // Cache di localStorage
   _cache: null,
   _cacheTime: 0,
-  _cacheDuration: 5 * 60 * 1000, // 5 menit
+  _cacheDuration: 5 * 60 * 1000,
 
-  async getAllStories(forceRefresh) {
-    // Cek cache
+  // GET metadata semua cerita (tanpa konten)
+  getAllStories: async function(forceRefresh) {
     if (!forceRefresh && this._cache && (Date.now() - this._cacheTime < this._cacheDuration)) {
-      console.log('📦 Pakai cache lokal');
       return this._cache;
     }
-
-    // Cek localStorage
+    
     var localCache = localStorage.getItem('stories_cache');
     var localTime = localStorage.getItem('stories_cache_time');
     
     if (!forceRefresh && localCache && localTime) {
       var age = Date.now() - parseInt(localTime);
       if (age < this._cacheDuration) {
-        console.log('💾 Pakai localStorage cache (' + Math.round(age/1000) + 's lalu)');
         var data = JSON.parse(localCache);
         this._cache = data;
         this._cacheTime = parseInt(localTime);
@@ -31,36 +27,35 @@ var API = {
       }
     }
 
-    // Fetch dari API
     try {
-      console.log('🌐 Fetch dari API...');
       var res = await fetch(API_CONFIG.URL + '?action=list');
       var data = await res.json();
       var stories = data.data || [];
       
-      // Simpan cache
       this._cache = stories;
       this._cacheTime = Date.now();
       localStorage.setItem('stories_cache', JSON.stringify(stories));
       localStorage.setItem('stories_cache_time', Date.now());
       
-      console.log('✅ Data fetched: ' + stories.length + ' cerita');
       return stories;
     } catch (err) {
-      console.error('❌ Fetch gagal, pakai cache lama');
-      // Fallback ke cache localStorage
       if (localCache) return JSON.parse(localCache);
-      // Fallback ke data.json
-      try {
-        var fallback = await fetch('data.json');
-        return await fallback.json();
-      } catch (e) {
-        return [];
-      }
+      return [];
     }
   },
 
-  async saveStory(storyData) {
+  // GET konten full 1 cerita
+  getStoryFull: async function(id) {
+    try {
+      var res = await fetch(API_CONFIG.URL + '?action=getFull&id=' + encodeURIComponent(id));
+      var data = await res.json();
+      return data.data || null;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  saveStory: async function(storyData) {
     try {
       var res = await fetch(API_CONFIG.URL + '?action=save&key=' + API_CONFIG.KEY, {
         method: 'POST',
@@ -68,7 +63,6 @@ var API = {
       });
       var result = await res.json();
       
-      // Invalidate cache setelah save
       if (result.success) {
         this._cache = null;
         localStorage.removeItem('stories_cache');
@@ -81,7 +75,7 @@ var API = {
     }
   },
 
-  async deleteStory(id) {
+  deleteStory: async function(id) {
     try {
       var res = await fetch(API_CONFIG.URL + '?action=delete&key=' + API_CONFIG.KEY, {
         method: 'POST',
@@ -89,7 +83,6 @@ var API = {
       });
       var result = await res.json();
       
-      // Invalidate cache
       if (result.success) {
         this._cache = null;
         localStorage.removeItem('stories_cache');
@@ -102,7 +95,7 @@ var API = {
     }
   },
 
-  async uploadImage(file) {
+  uploadImage: async function(file) {
     return new Promise(function(resolve) {
       var reader = new FileReader();
       reader.onload = async function() {
