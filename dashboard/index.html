@@ -120,5 +120,20 @@
             navigator.serviceWorker.register('/sw.js');
         }
     </script>
+
+<script>
+    function setTheme() {
+        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var themeColor = document.getElementById('themeColor');
+        if (isDark) {
+            themeColor.setAttribute('content', '#1a1a1a');
+        } else {
+            themeColor.setAttribute('content', '#fafaf9');
+        }
+    }
+    setTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setTheme);
+</script>
+
 </body>
 </html>
