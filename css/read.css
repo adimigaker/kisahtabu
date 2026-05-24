@@ -292,3 +292,43 @@ body {
     .read-footer { padding: 0.5rem 0.8rem; }
     .footer-nav-btn { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
 }
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+    
+    .read-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+    
+    .read-footer {
+        background: #1a1a1a;
+        border-top-color: #333;
+    }
+    
+    .read-content h1, .read-content h2, .read-content h3 {
+        color: #e0e0e0;
+    }
+    
+    .footer-nav-btn {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #ccc;
+    }
+    
+    .overlay-content {
+        background: #2a2a2a;
+        color: #e0e0e0;
+    }
+    
+    .overlay-header {
+        border-bottom-color: #333;
+    }
+    
+    #overlayChapterList .chapter-item {
+        border-bottom-color: #333;
+    }
+}
