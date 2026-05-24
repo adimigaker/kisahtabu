@@ -529,3 +529,102 @@ body {
     .content-justify hr { height: 50px; margin: 1.5rem auto; }
     .image-block-inputs { flex-direction: column; }
 }
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+    
+    .editor-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+    
+    .header-id { color: #999; }
+    .nav-btn { color: #999; border-color: #444; }
+    .nav-btn:hover { background: #333; color: #ccc; }
+    .icon-btn { color: #777; }
+    .icon-btn:hover { background: #333; color: #ccc; }
+    
+    .editor-footer {
+        background: #1a1a1a;
+        border-top-color: #333;
+    }
+    
+    .editor-container {
+        background: #2a2a2a;
+        border-color: #333;
+    }
+    
+    .toolbar {
+        background: #2a2a2a;
+        border-bottom-color: #333;
+    }
+    
+    .toolbar button {
+        color: #999;
+    }
+    
+    .toolbar button:hover { background: #333; color: #ccc; }
+    .toolbar button.active { background: #555; color: #fff; }
+    .toolbar-sep { background: #444; }
+    
+    .editor-area {
+        color: #e0e0e0;
+    }
+    
+    .editor-area:empty::before { color: #666; }
+    .editor-area:focus:empty::before { color: #555; }
+    
+    .title-input {
+        color: #e0e0e0;
+        border-bottom-color: #444;
+    }
+    
+    .title-input:focus { border-bottom-color: #777; }
+    .title-input::placeholder { color: #666; }
+    
+    .input-group label { color: #999; }
+    .input-group input {
+        background: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .input-group input:focus { border-color: #777; }
+    
+    .thumb-upload-btn { color: #999; border-color: #444; }
+    .thumb-upload-btn:hover { background: #333; color: #ccc; }
+    .thumb-input { background: #333; border-color: #444; color: #e0e0e0; }
+    
+    .id-chapter-edit { background: #222; border-color: #444; }
+    
+    .image-block {
+        background: #222;
+        border-color: #555;
+    }
+    
+    .image-block-url {
+        background: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .image-block-upload-btn {
+        background: #333;
+        border-color: #444;
+        color: #ccc;
+    }
+    
+    .image-block-upload-btn:hover { background: #444; }
+    .image-block-title { color: #999; }
+    
+    .draft-btn { color: #999; border-color: #444; }
+    .draft-btn:hover { background: #333; color: #ccc; }
+    
+    .content-justify h1, .content-justify h2, .content-justify h3 { color: #e0e0e0; }
+    
+    .toast { background: #555; }
+}
