@@ -421,3 +421,78 @@ main {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+    
+    .dash-header {
+        background: #1a1a1a;
+        border-bottom-color: #333;
+    }
+    
+    .dash-header h1 { color: #e0e0e0; }
+    
+    .btn-new-story { background: #555; }
+    .btn-new-story:hover { background: #777; }
+    
+    .btn-secondary {
+        background: #2a2a2a;
+        color: #ccc;
+        border-color: #444;
+    }
+    
+    .btn-secondary:hover { background: #333; color: #fff; }
+    
+    .series-card {
+        background: #2a2a2a;
+        border-color: #333;
+    }
+    
+    .series-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+    .series-card .info h3 { color: #e0e0e0; }
+    .series-card .info small { color: #999; }
+    .series-card img { background: #1a1a1a; }
+    
+    .empty-state { color: #777; }
+    .empty-state h3 { color: #999; }
+    
+    .modal-popup {
+        background: #2a2a2a;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .modal-popup h2 { color: #e0e0e0; }
+    .modal-close { color: #777; }
+    .modal-close:hover { background: #333; color: #ccc; }
+    
+    .input-group label { color: #999; }
+    .input-group input {
+        background: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .input-group input:focus { border-color: #777; }
+    
+    .btn-start { background: #555; }
+    .btn-start:hover { background: #777; }
+    
+    .confirm-popup h3 { color: #e0e0e0; }
+    .confirm-popup p { color: #999; }
+    
+    .confirm-icon-wrap { background: #3a1a1a; }
+    
+    .btn-cancel { background: #444; color: #ccc; }
+    .btn-cancel:hover { background: #555; }
+    
+    .btn-delete { background: #c0392b; }
+    .btn-delete:hover { background: #e74c3c; }
+    
+    .delete-bg { background: #8b0000; }
+    
+    .toast-notif { background: #555; }
+}
