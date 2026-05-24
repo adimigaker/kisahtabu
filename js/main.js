@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var stories = [];
+    var displayedCount = 0;
+    var loadMoreBtn = null;
     var bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
     var history = JSON.parse(localStorage.getItem('history') || '[]');
     var container = document.getElementById('contentContainer');
@@ -58,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pullDistance = 0;
     });
 
-    // ========== REFRESH ==========
+    // ========== REFRESH (FORCE) ==========
     async function refreshData() {
         localStorage.removeItem('stories_cache');
         localStorage.removeItem('stories_cache_time');
@@ -69,20 +71,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             stories = await API.getAllStories(true);
-            renderStories(stories);
+            displayedCount = 0;
+            renderStories(stories.slice(0, 10));
         } catch (err) {
             container.innerHTML = '<div class="loading-state">' + svgIcons.xCircle + '<p>Gagal memuat</p><button onclick="refreshData()" style="margin-top:10px;padding:8px 16px;background:#333;color:#fff;border:none;border-radius:6px;cursor:pointer;">Coba Lagi</button></div>';
         }
     }
 
-    // ========== LOAD STORIES ==========
+    // ========== LOAD STORIES (PAKAI CACHE) ==========
     async function loadStories() {
         var cached = localStorage.getItem('stories_cache');
 
         if (cached) {
             try {
                 stories = JSON.parse(cached);
-                renderStories(stories);
+                displayedCount = 0;
+                renderStories(stories.slice(0, 10));
             } catch (e) {
                 container.innerHTML = '<div class="loading-state">' + svgIcons.spinner + '<p>Memuat cerita...</p></div>';
             }
@@ -91,8 +95,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            stories = await API.getAllStories(true);
-            renderStories(stories);
+            stories = await API.getAllStories();
+            displayedCount = 0;
+            renderStories(stories.slice(0, 10));
         } catch (err) {
             if (!cached) {
                 container.innerHTML = '<div class="loading-state">' + svgIcons.xCircle + '<p>Gagal memuat cerita</p><button onclick="refreshData()" style="margin-top:10px;padding:8px 16px;background:#333;color:#fff;border:none;border-radius:6px;cursor:pointer;">Coba Lagi</button></div>';
@@ -100,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ========== RENDER STORIES ==========
+    // ========== RENDER STORIES (10 FIRST) ==========
     function renderStories(data) {
         container.innerHTML = '';
 
@@ -141,9 +146,70 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(card);
         });
 
+        // Load More Button
+        var totalDisplayed = document.querySelectorAll('.story-card').length;
+        if (totalDisplayed < stories.length) {
+            loadMoreBtn = document.createElement('button');
+            loadMoreBtn.className = 'load-more-btn';
+            loadMoreBtn.textContent = 'Muat Lebih Banyak (' + (stories.length - totalDisplayed) + ' cerita)';
+            loadMoreBtn.addEventListener('click', function() {
+                var currentCount = document.querySelectorAll('.story-card').length;
+                var nextBatch = stories.slice(currentCount, currentCount + 10);
+                var oldBtn = container.querySelector('.load-more-btn');
+                if (oldBtn) oldBtn.remove();
+                renderMoreStories(nextBatch);
+            });
+            container.appendChild(loadMoreBtn);
+        }
+
         setupBookmarks();
     }
 
+    // ========== RENDER MORE STORIES ==========
+    function renderMoreStories(data) {
+        data.forEach(function(item) {
+            var isBookmarked = bookmarks.includes(item.id);
+            var card = document.createElement('div');
+            card.className = 'story-card';
+            card.innerHTML =
+                '<img class="thumbnail" src="' + (item.thumbnail || 'assets/default-thumb.jpg') + '" ' +
+                'alt="' + item.title + '" onerror="this.src=\'assets/default-thumb.jpg\'">' +
+                '<div class="info">' +
+                '<h3>' + item.title + '</h3>' +
+                '<small>' + item.id + '</small>' +
+                '</div>' +
+                '<button class="bookmark-btn ' + (isBookmarked ? 'bookmarked' : '') + '" data-id="' + item.id + '">' +
+                '<svg class="bookmark-outline" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2">' +
+                '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' +
+                '</svg>' +
+                '<svg class="bookmark-filled" width="18" height="18" viewBox="0 0 24 24" fill="#e74c3c" stroke="#e74c3c" stroke-width="2">' +
+                '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' +
+                '</svg>' +
+                '</button>';
+
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.bookmark-btn')) return;
+                if (!history.includes(item.id)) {
+                    history.push(item.id);
+                    localStorage.setItem('history', JSON.stringify(history));
+                }
+                window.location.href = 'read.html?id=' + item.id;
+            });
+
+            container.insertBefore(card, loadMoreBtn);
+        });
+
+        var totalDisplayed = document.querySelectorAll('.story-card').length;
+        if (totalDisplayed < stories.length) {
+            loadMoreBtn.textContent = 'Muat Lebih Banyak (' + (stories.length - totalDisplayed) + ' cerita)';
+        } else {
+            if (loadMoreBtn) loadMoreBtn.remove();
+        }
+
+        setupBookmarks();
+    }
+
+    // ========== SETUP BOOKMARKS ==========
     function setupBookmarks() {
         document.querySelectorAll('.bookmark-btn').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -171,12 +237,13 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function(e) {
         var term = e.target.value.toLowerCase();
         if (!term) {
-            renderStories(stories);
+            renderStories(stories.slice(0, 10));
             return;
         }
-        renderStories(stories.filter(function(s) {
+        var filtered = stories.filter(function(s) {
             return s.title.toLowerCase().includes(term) || s.id.toLowerCase().includes(term);
-        }));
+        });
+        renderStories(filtered);
     });
 
     // ========== FOOTER TABS ==========
@@ -188,11 +255,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (view === 'home') {
                 searchInput.value = '';
-                renderStories(stories);
+                renderStories(stories.slice(0, 10));
             } else if (view === 'bookmark') {
-                renderStories(stories.filter(function(s) { return bookmarks.includes(s.id); }));
+                var filtered = stories.filter(function(s) { return bookmarks.includes(s.id); });
+                renderStories(filtered);
             } else if (view === 'history') {
-                renderStories(stories.filter(function(s) { return history.includes(s.id); }));
+                var filtered = stories.filter(function(s) { return history.includes(s.id); });
+                renderStories(filtered);
             }
         });
     });
