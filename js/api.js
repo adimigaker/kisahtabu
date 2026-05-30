@@ -8,28 +8,32 @@ var API = {
     _cacheTime: 0,
     _cacheDuration: 5 * 60 * 1000,
 
+    // GET metadata semua cerita (untuk home & dashboard)
     getAllStories: async function(forceRefresh) {
+        // Kalau tidak force refresh, cek cache
         if (!forceRefresh && this._cache && (Date.now() - this._cacheTime < this._cacheDuration)) {
-            console.log('Pakai memory cache');
+            console.log('📦 Pakai memory cache');
             return this._cache;
         }
 
-        var localCache = localStorage.getItem('stories_cache');
-        var localTime = localStorage.getItem('stories_cache_time');
+        if (!forceRefresh) {
+            var localCache = localStorage.getItem('stories_cache');
+            var localTime = localStorage.getItem('stories_cache_time');
 
-        if (!forceRefresh && localCache && localTime) {
-            var age = Date.now() - parseInt(localTime);
-            if (age < this._cacheDuration) {
-                console.log('Pakai localStorage cache (' + Math.round(age/1000) + 's lalu)');
-                var data = JSON.parse(localCache);
-                this._cache = data;
-                this._cacheTime = parseInt(localTime);
-                return data;
+            if (localCache && localTime) {
+                var age = Date.now() - parseInt(localTime);
+                if (age < this._cacheDuration) {
+                    console.log('💾 Pakai localStorage cache (' + Math.round(age/1000) + 's lalu)');
+                    var data = JSON.parse(localCache);
+                    this._cache = data;
+                    this._cacheTime = parseInt(localTime);
+                    return data;
+                }
             }
         }
 
         try {
-            console.log('Fetch dari API...');
+            console.log('🌐 Fetch dari API...');
             var res = await fetch(API_CONFIG.URL + '?action=list');
             var data = await res.json();
             var stories = data.data || [];
@@ -39,31 +43,36 @@ var API = {
             localStorage.setItem('stories_cache', JSON.stringify(stories));
             localStorage.setItem('stories_cache_time', Date.now());
 
-            console.log('Data fetched:', stories.length, 'cerita');
+            console.log('✅ Data fetched: ' + stories.length + ' cerita');
             return stories;
         } catch (err) {
-            console.error('Fetch error:', err);
-            if (localCache) return JSON.parse(localCache);
+            console.error('❌ Fetch error:', err);
+            if (!forceRefresh && localCache) return JSON.parse(localCache);
             return [];
         }
     },
 
-    getStoryFull: async function(id) {
+    // GET konten full 1 cerita (untuk read & editor)
+    getStoryFull: async function(id, forceRefresh) {
         var cacheKey = 'story_content_' + id;
         var cacheTimeKey = 'story_content_time_' + id;
-        var localContent = localStorage.getItem(cacheKey);
-        var localTime = localStorage.getItem(cacheTimeKey);
 
-        if (localContent && localTime) {
-            var age = Date.now() - parseInt(localTime);
-            if (age < this._cacheDuration) {
-                console.log('Pakai cache konten:', id);
-                return JSON.parse(localContent);
+        // Kalau tidak force refresh, cek cache
+        if (!forceRefresh) {
+            var localContent = localStorage.getItem(cacheKey);
+            var localTime = localStorage.getItem(cacheTimeKey);
+
+            if (localContent && localTime) {
+                var age = Date.now() - parseInt(localTime);
+                if (age < this._cacheDuration) {
+                    console.log('💾 Pakai cache konten: ' + id);
+                    return JSON.parse(localContent);
+                }
             }
         }
 
         try {
-            console.log('Fetch konten:', id);
+            console.log('🌐 Fetch konten: ' + id);
             var res = await fetch(API_CONFIG.URL + '?action=getFull&id=' + encodeURIComponent(id));
             var data = await res.json();
             var story = data.data || null;
@@ -75,12 +84,13 @@ var API = {
 
             return story;
         } catch (err) {
-            console.error('getStoryFull error:', err);
-            if (localContent) return JSON.parse(localContent);
+            console.error('❌ getStoryFull error:', err);
+            if (!forceRefresh && localContent) return JSON.parse(localContent);
             return null;
         }
     },
 
+    // POST simpan cerita
     saveStory: async function(storyData) {
         try {
             var res = await fetch(API_CONFIG.URL + '?action=save&key=' + API_CONFIG.KEY, {
@@ -90,6 +100,7 @@ var API = {
             var result = await res.json();
 
             if (result.success) {
+                // Hapus semua cache
                 this._cache = null;
                 localStorage.removeItem('stories_cache');
                 localStorage.removeItem('stories_cache_time');
@@ -103,6 +114,7 @@ var API = {
         }
     },
 
+    // POST hapus cerita
     deleteStory: async function(id) {
         try {
             var res = await fetch(API_CONFIG.URL + '?action=delete&key=' + API_CONFIG.KEY, {
@@ -112,6 +124,7 @@ var API = {
             var result = await res.json();
 
             if (result.success) {
+                // Hapus semua cache
                 this._cache = null;
                 localStorage.removeItem('stories_cache');
                 localStorage.removeItem('stories_cache_time');
@@ -125,6 +138,7 @@ var API = {
         }
     },
 
+    // POST upload gambar
     uploadImage: async function(file) {
         return new Promise(function(resolve) {
             var reader = new FileReader();
