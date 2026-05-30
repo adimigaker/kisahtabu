@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     removeThumbBtn.addEventListener('click', function() { storyThumb.value = ''; updateThumbPreview(); saveDraftAuto(); });
 
+    // ========== LOAD STORY (NO CACHE) ==========
     async function loadStory() {
         if (isNew) {
             var info = JSON.parse(sessionStorage.getItem('newStoryInfo') || '{}');
@@ -80,8 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.removeItem('newStoryInfo');
         } else if (editId) {
             try {
-                var stories = await API.getAllStories();
-                var story = stories.find(function(s) { return s.id === editId; });
+                var story = await API.getStoryFull(editId, true);
                 if (story) {
                     currentId = story.id;
                     originalId = story.id;
@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateStats(); saveDraftAuto();
     });
 
-    // ========== INSERT DIVIDER ==========
     document.getElementById('insertDividerBtn').addEventListener('click', function(e) {
         e.preventDefault();
         editorContent.focus();
@@ -171,15 +170,13 @@ document.addEventListener('DOMContentLoaded', function() {
         saveDraftAuto();
     });
 
-    // ========== INSERT IMAGE (INLINE BLOCK) ==========
+    // ========== INSERT IMAGE ==========
     document.getElementById('insertImageBtn').addEventListener('click', function(e) {
         e.preventDefault();
         editorContent.focus();
-        
         var sel = window.getSelection();
         if (sel.rangeCount === 0) return;
         var range = sel.getRangeAt(0);
-        
         var imageBlock = document.createElement('div');
         imageBlock.className = 'image-block';
         imageBlock.contentEditable = 'false';
@@ -200,13 +197,11 @@ document.addEventListener('DOMContentLoaded', function() {
             '<div class="image-block-preview" style="display:none;">' +
             '<img class="image-block-preview-img" src="" alt="Preview">' +
             '<button class="image-block-insert-btn">Sisipkan ke konten</button></div></div>';
-        
         range.insertNode(imageBlock);
         range.setStartAfter(imageBlock);
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
-        
         setupImageBlock(imageBlock);
         updateStats();
         saveDraftAuto();
@@ -220,21 +215,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var insertBtn = block.querySelector('.image-block-insert-btn');
         var removeBtn = block.querySelector('.image-block-remove');
         var pendingUrl = '';
-        
         urlInput.addEventListener('input', function() {
             var url = urlInput.value.trim();
             if (url) { pendingUrl = url; previewImg.src = url; previewDiv.style.display = 'block'; }
             else { pendingUrl = ''; previewDiv.style.display = 'none'; }
         });
-        
         urlInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                var url = urlInput.value.trim();
-                if (url) { pendingUrl = url; previewImg.src = url; previewDiv.style.display = 'block'; insertImageFromBlock(block, url); }
-            }
+            if (e.key === 'Enter') { e.preventDefault(); var url = urlInput.value.trim(); if (url) { pendingUrl = url; previewImg.src = url; previewDiv.style.display = 'block'; insertImageFromBlock(block, url); } }
         });
-        
         uploadBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             var input = document.createElement('input');
@@ -252,16 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             input.click();
         });
-        
         insertBtn.addEventListener('click', function() { if (pendingUrl) insertImageFromBlock(block, pendingUrl); });
         previewImg.addEventListener('click', function() { if (pendingUrl) insertImageFromBlock(block, pendingUrl); });
-        
-        removeBtn.addEventListener('click', function() {
-            block.remove();
-            updateStats();
-            saveDraftAuto();
-        });
-        
+        removeBtn.addEventListener('click', function() { block.remove(); updateStats(); saveDraftAuto(); });
         setTimeout(function() { urlInput.focus(); }, 100);
     }
 
@@ -269,46 +250,30 @@ document.addEventListener('DOMContentLoaded', function() {
         var wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
         wrapper.contentEditable = 'false';
-        
         var img = document.createElement('img');
         img.src = url;
         img.setAttribute('data-inserted', 'true');
-        
         var removeBtn = document.createElement('button');
         removeBtn.className = 'image-remove-btn';
         removeBtn.title = 'Hapus gambar';
         removeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-        
         removeBtn.addEventListener('mouseenter', function() { this.style.transform = 'scale(1.15)'; });
         removeBtn.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
-        
-        removeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            wrapper.remove();
-            editorContent.focus();
-            updateStats();
-            saveDraftAuto();
-        });
-        
+        removeBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); wrapper.remove(); editorContent.focus(); updateStats(); saveDraftAuto(); });
         wrapper.appendChild(img);
         wrapper.appendChild(removeBtn);
-        
         block.parentNode.replaceChild(wrapper, block);
-        
         var sel = window.getSelection();
         var range = document.createRange();
         range.setStartAfter(wrapper);
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
-        
         editorContent.focus();
         updateStats();
         saveDraftAuto();
     }
 
-    // ========== STATS ==========
     function updateStats() {
         var text = editorContent.innerText || '';
         wordCount.textContent = (text.trim() ? text.trim().split(/\s+/).length : 0) + ' kata';
@@ -325,6 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveDraftBtn.addEventListener('click', function() { saveDraftAuto(); showToast(svg.save, 'Draft tersimpan'); });
 
+    // ========== PUBLISH (NO CACHE) ==========
     publishBtn.addEventListener('click', async function() {
         if (!currentId) { showToast(svg.alert, 'Isi ID dulu!'); editIdChapterBtn.click(); return; }
         var title = storyTitle.value.trim();
