@@ -35,10 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
         toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, 2500);
     }
 
+    // ========== LOAD DATA (NO CACHE) ==========
     async function loadStories() {
         seriesContainer.innerHTML = '<div class="empty-state">' + svg.spinner + '<p>Memuat...</p></div>';
         try {
-            stories = await API.getAllStories();
+            stories = await API.getAllStories(true);
             stories.sort(function(a, b) {
                 var idA = a.id || '', idB = b.id || '';
                 var prefixA = idA.split('-')[0], prefixB = idB.split('-')[0];
