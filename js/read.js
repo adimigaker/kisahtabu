@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function() {
     var urlParams = new URLSearchParams(window.location.search);
     var currentId = urlParams.get('id');
-
+    
     if (!currentId) {
         document.getElementById('readContent').innerHTML = '<p style="text-align:center;margin-top:3rem;">Cerita tidak ditemukan.</p>';
         return;
@@ -37,14 +37,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (readBookmarkBtn) readBookmarkBtn.classList.toggle('bookmarked', bookmarks.includes(currentId));
     }
 
-    // ========== LAZY RENDER ==========
     function lazyRenderContent(html, title, id) {
         headerTitle.textContent = title || 'Kisah Tabu';
         chapterIndicator.textContent = id || '';
-
         var parts = html.split(/<hr[^>]*>/);
         var currentPart = 0;
-
         readContent.innerHTML = '';
         var wrapper = document.createElement('div');
         readContent.appendChild(wrapper);
@@ -52,24 +49,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         function renderFirstPart() {
             if (currentPart >= parts.length) return;
             var partHTML = parts[currentPart].trim();
-            if (!partHTML && currentPart < parts.length) {
-                currentPart++;
-                renderFirstPart();
-                return;
-            }
+            if (!partHTML && currentPart < parts.length) { currentPart++; renderFirstPart(); return; }
             var partDiv = document.createElement('div');
             partDiv.className = 'content-part';
             partDiv.innerHTML = partHTML;
             wrapper.appendChild(partDiv);
             currentPart++;
-
             if (prevBtn) prevBtn.disabled = currentIndex <= 0;
             if (nextBtn) nextBtn.disabled = currentIndex >= seriesChapters.length - 1;
             updateBookmarkUI();
-
             var savedScroll = scrollMemory[currentId];
             if (savedScroll) setTimeout(function() { window.scrollTo(0, savedScroll); }, 50);
-
             if (currentPart < parts.length) setTimeout(renderNextPart, 20);
         }
 
@@ -77,10 +67,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (currentPart >= parts.length) return;
             var partHTML = parts[currentPart].trim();
             if (!partHTML) { currentPart++; renderNextPart(); return; }
-            if (currentPart > 0) {
-                var hr = document.createElement('hr');
-                wrapper.appendChild(hr);
-            }
+            if (currentPart > 0) { var hr = document.createElement('hr'); wrapper.appendChild(hr); }
             var partDiv = document.createElement('div');
             partDiv.className = 'content-part';
             partDiv.style.animation = 'fadeIn 0.3s ease forwards';
@@ -93,7 +80,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         renderFirstPart();
     }
 
-    // ========== NAVIGASI ==========
     function goToChapter(index) {
         if (index < 0 || index >= seriesChapters.length) return;
         scrollMemory[currentId] = window.scrollY;
@@ -109,14 +95,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }, 100);
     }
 
-    // ========== LOAD ==========
     showSpinner();
 
     var currentStory = await API.getStoryFull(currentId);
-    if (!currentStory) {
-        readContent.innerHTML = '<p style="text-align:center;margin-top:3rem;">Cerita tidak ditemukan.</p>';
-        return;
-    }
+    if (!currentStory) { readContent.innerHTML = '<p style="text-align:center;margin-top:3rem;">Cerita tidak ditemukan.</p>'; return; }
 
     try {
         var allStories = await API.getAllStories();
@@ -126,13 +108,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         currentIndex = seriesChapters.findIndex(function(s) { return s.id === currentId; });
         if (currentIndex < 0) currentIndex = 0;
-    } catch (err) {
-        seriesChapters = [{ id: currentId, title: currentStory.title }];
-    }
+    } catch (err) { seriesChapters = [{ id: currentId, title: currentStory.title }]; }
 
     if (!history.includes(currentId)) { history.push(currentId); localStorage.setItem('history', JSON.stringify(history)); }
 
-    // ========== BOOKMARK ==========
     if (readBookmarkBtn) {
         readBookmarkBtn.addEventListener('click', function() {
             var idx = bookmarks.indexOf(currentId);
@@ -143,7 +122,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // ========== EVENT LISTENERS ==========
     if (prevBtn) prevBtn.addEventListener('click', function() { if (currentIndex > 0) goToChapter(currentIndex - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function() { if (currentIndex < seriesChapters.length - 1) goToChapter(currentIndex + 1); });
     if (backBtn) backBtn.addEventListener('click', function() { scrollMemory[currentId] = window.scrollY; localStorage.setItem('scrollMemory', JSON.stringify(scrollMemory)); window.location.href = 'index.html'; });
@@ -162,9 +140,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         chapterOverlay.addEventListener('click', function(e) { if (e.target === chapterOverlay) chapterOverlay.classList.remove('show'); });
     }
 
-    // ========== AUTO HIDE ==========
-    var lastScrollY = window.scrollY;
-    var scrollTimeout;
+    var lastScrollY = window.scrollY, scrollTimeout;
     window.addEventListener('scroll', function() {
         var cs = window.scrollY;
         if (cs > lastScrollY && cs > 100) { if (readHeader) readHeader.classList.add('hidden'); if (readFooter) readFooter.classList.add('hidden'); }
@@ -179,7 +155,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (e.key === 'ArrowRight') { e.preventDefault(); if (currentIndex < seriesChapters.length - 1) goToChapter(currentIndex + 1); }
     });
 
-    // ========== RENDER ==========
     lazyRenderContent(currentStory.content, currentStory.title, currentStory.id);
     updateBookmarkUI();
 });
